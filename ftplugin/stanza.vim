@@ -1,7 +1,7 @@
 " Vim filetype plugin file
 " Language:    Stanza
 " Author:      Tyler Lanphear <t.lanphear@jitx.com>
-" Last Change: 2021 Aug 10
+" Last Change: 2021 Aug 18
 
 if exists("b:did_ftplugin") | finish | endif
 

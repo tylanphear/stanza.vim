@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Stanza
 " Maintainer: Tyler Lanphear
-" Latest Revision: 11 August 2021
+" Last Change: 2021 Aug 18
 
 if exists("b:current_syntax") | finish | endif
 

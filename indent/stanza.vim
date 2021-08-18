@@ -1,7 +1,7 @@
 " Vim indent file
 " Language:    Stanza
 " Author:      Tyler Lanphear <t.lanphear@jitx.com>
-" Last Change: 2021 Aug 11
+" Last Change: 2021 Aug 18
 
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent") | finish | endif
