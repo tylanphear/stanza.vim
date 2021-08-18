@@ -30,14 +30,14 @@ function! GetStanzaIndent(lnum)
 
   " Search backwards for the previous non-empty line.
   let plnum = prevnonblank(v:lnum - 1)
-
   if plnum == 0
     " This is the first non-empty line, use zero indent.
     return 0
   endif
 
+  " Move the cursor to the first non-blank line and grab some relevant info
+  " about the line and its indentation
   call cursor(plnum, 1)
-
   let plindent = indent(plnum)
   let pline = getline(plnum)
   let pline_len = len(pline)
@@ -61,6 +61,10 @@ function! GetStanzaIndent(lnum)
   return -1
 
 endfunction
+
+let b:undo_indent = "
+            \setlocal lisp< autoindent< indentexpr< indentkeys<
+            \| delfunction! GetStanzaIndent"
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
