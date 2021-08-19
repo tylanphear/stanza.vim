@@ -9,11 +9,9 @@ let s:saved_cpo = &cpo
 set cpo&vim
 
 " Stanza stuff {{{1
-syn keyword stanzaKeyword in let let-var where with within label defpackage switch match to through by not and or fn fn* generate yield break attempt do return fatal val var
-syn keyword stanzaKeyword defsyntax defrule defproduction fail-if
+syn keyword stanzaKeyword in let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do return fatal val var
 syn keyword stanzaLostanzaKeywords call-c call-prim goto sizeof
 syn keyword stanzaException try catch finally throw
-syn keyword stanzaInclude from import
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while
 syn keyword stanzaBoolean true false
@@ -21,13 +19,22 @@ syn keyword stanzaAccess public protected private lostanza
 syn keyword stanzaThis this
 syn keyword stanzaBuiltinType True False Byte Int Long Float Double String Char Symbol ?
 syn keyword stanzaLostanzaBuiltinType int byte ref long float double ptr
-syn keyword stanzaTypeOperator upcast-as as is-not is new nextgroup=stanzaAnnotatedType skipwhite
+syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaAnnotatedType skipwhite
 syn keyword stanzaNull null
+
+syn keyword stanzaKeyword defsyntax defrule defproduction fail-if nextgroup=stanzaMacroName skipwhite
+syn match stanzaMacroName display contained "\K\k*"
+
+syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)defpackage" matchgroup=NONE end="^\z1\S"me=e-1 contains=stanzaInclude,stanzaOperator
+syn keyword stanzaInclude contained from import
 
 " Kind of a hack, but anything top-level (doesn't have `contains`) syntax
 " group that can be contained in a stanza anonymous function should be added
 " to this cluster
-syn cluster stanzaAnonFnTop contains=stanzaKeyword,stanzaException,stanzaConditional,stanzaRepeat,stanzaBoolean,stanzaThis,stanzaBuiltinType,stanzaLostanzaBuiltinType,stanzaTypeOperator,stanzaNull
+syn cluster stanzaAnonFnTop contains=stanzaKeyword,stanzaException,stanzaConditional,stanzaRepeat,stanzaBoolean,stanzaThis,stanzaBuiltinType,stanzaLostanzaBuiltinType,stanzaTypeOperator
+
+syn match stanzaTabError "\t\+" display
+syn cluster stanzaAnonFnTop add=stanzaTabError
 
 syn keyword stanzaKeyword deftest nextgroup=stanzaTestParams,stanzaTestCase
 syn region stanzaTestParams start="(" end=")" display contained contains=stanzaTestParam nextgroup=stanzaTestCase
@@ -127,16 +134,17 @@ hi def link stanzaVariableDefinition Statement
 hi def link stanzaAnonymousParameter Macro
 hi def link stanzaNull constant
 hi def link stanzaLostanzaKeywords Statement
+hi def link stanzaTabError Error
 
 " }}}
 " JITX stuff{{{1
 
 " Grab the first line of the file and check for a #use-added-syntax directive
-let b:first_line_of_file = getline(1)
-let b:syntax_matches = matchlist(b:first_line_of_file, "#use-added-syntax(\\(.\\{-}\\))")
-let b:added_syntax = get(b:syntax_matches, 1, "")
+let s:first_line_of_file = getline(1)
+let s:syntax_matches = matchlist(s:first_line_of_file, "#use-added-syntax(\\(.\\{-}\\))")
+let s:added_syntax = get(s:syntax_matches, 1, "")
 
-if b:added_syntax == "jitx" || b:added_syntax == "esir"
+if s:added_syntax == "jitx" || s:added_syntax == "esir"
     syn keyword jitxKeyword pcb-module pcb-symbol pcb-component pcb-package pcb-design pcb-pad pcb-board pcb-landpattern pcb-material pcb-stackup
     syn keyword jitxKeyword port pin net require pad unique self
     syn keyword jitxKeyword at on
@@ -162,6 +170,8 @@ endif
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
+
+unlet s:first_line_of_file s:syntax_matches s:added_syntax
 
 let b:current_syntax = "stanza"
 
