@@ -9,32 +9,32 @@ let s:saved_cpo = &cpo
 set cpo&vim
 
 " Stanza stuff {{{1
-syn keyword stanzaKeyword in let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do return fatal val var
-syn keyword stanzaLostanzaKeywords call-c call-prim goto sizeof
+syn keyword stanzaKeyword in let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do return val var
 syn keyword stanzaException try catch finally throw
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while
 syn keyword stanzaBoolean true false
-syn keyword stanzaAccess public protected private lostanza
+syn keyword stanzaAccess public protected private
 syn keyword stanzaThis this
 syn keyword stanzaBuiltinType True False Byte Int Long Float Double String Char Symbol ?
-syn keyword stanzaLostanzaBuiltinType int byte ref long float double ptr
 syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaAnnotatedType skipwhite
 syn keyword stanzaNull null
+syn keyword stanzaFatal fatal fatal!
 
 syn keyword stanzaKeyword defsyntax defrule defproduction fail-if nextgroup=stanzaMacroName skipwhite
 syn match stanzaMacroName display contained "\K\k*"
 
-syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)defpackage" matchgroup=NONE end="^\z1\S"me=e-1 contains=stanzaInclude,stanzaOperator
-syn keyword stanzaInclude contained from import
+syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)defpackage" matchgroup=NONE end="^\z1\S"me=e-1 contains=stanzaInclude,stanzaOperator,stanzaTabError
+syn keyword stanzaInclude contained from import with
 
-" Kind of a hack, but anything top-level (doesn't have `contains`) syntax
-" group that can be contained in a stanza anonymous function should be added
-" to this cluster
-syn cluster stanzaAnonFnTop contains=stanzaKeyword,stanzaException,stanzaConditional,stanzaRepeat,stanzaBoolean,stanzaThis,stanzaBuiltinType,stanzaLostanzaBuiltinType,stanzaTypeOperator
+syn cluster stanzaCommonTop contains=stanzaKeyword,stanzaConditional,stanzaRepeat,stanzaBoolean,stanzaBuiltinType,stanzaDirective,stanzaOperator,stanzaTypeOperator,stanzaNumber,stanzaComment,stanzaBlockComment,stanzaString,stanzaRawString,stanzaTabError
+
+syn region stanzaLostanza matchgroup=stanzaAccess start="lostanza" matchgroup=NONE end="^\S"me=e-1 contains=@stanzaLostanzaTop
+syn cluster stanzaLostanzaTop contains=@stanzaCommonTop,stanzaLostanzaBuiltinType,stanzaLostanzaKeywords
+syn keyword stanzaLostanzaBuiltinType int byte ref long float double ptr contained
+syn keyword stanzaLostanzaKeywords call-c call-prim goto sizeof labels contained
 
 syn match stanzaTabError "\t\+" display
-syn cluster stanzaAnonFnTop add=stanzaTabError
 
 syn keyword stanzaKeyword deftest nextgroup=stanzaTestParams,stanzaTestCase
 syn region stanzaTestParams start="(" end=")" display contained contains=stanzaTestParam nextgroup=stanzaTestCase
@@ -50,54 +50,46 @@ syn match stanzaStructName "\K\k*" display contained
 " Operators that can't appear in Stanza identifiers
 syn match stanzaOperator "\%(:\||\|&\|\$>\|<\|<=\|<\|>=\|>\|=>\)"
 " Operators that *can* appear in Stanza identifiers
-syn match stanzaOperator "\k\@<!\%(\~\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
-syn cluster stanzaAnonFnTop add=stanzaOperator
+syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
 
 " This has to come *after* the matches for `:`, `<`, `-`, and `>` so it takes priority
 syn match stanzaTypeAnnotation "\%(->\|<:\)" nextgroup=stanzaAnnotatedType skipwhite
 syn match stanzaAnnotatedType "\K\k*" display contained
-syn cluster stanzaAnonFnTop add=stanzaTypeAnnotation
 
-syn match stanzaComment ";.*$"
-syn cluster stanzaAnonFnTop add=stanzaComment
+syn keyword stanzaTodo TODO FIXME NOTE
 
-" A block comment is started with ;<TAG> and then ended by <TAG>, where TAG
-" can be any identifier
-syn region stanzaBlockComment start=+;\z(<\k\+>\)+ end=+\z1+
+syn region stanzaComment start=";" end="$" contains=stanzaTodo,@Spell oneline
+
+" A block comment is started with ;<TAG> and then ended by <TAG>
+syn region stanzaBlockComment start=";\z(<[^>]*>\)" end="\z1" contains=stanzaTodo,@Spell
 
 syn match stanzaCapture "?\w\+" display
 
-syn match stanzaDirective "#\K\k*"
-syn cluster stanzaAnonFnTop add=stanzaDirective
+syn match stanzaSymbol "`\k\+" display
+syn match stanzaDirective "\k\@<!#\K\k*"
 
-syn match stanzaNumber "\<-\?\d\+[LY]\?\>"
+syn match stanzaNumber "\<-\?\d\+[lLyY]\?\>"
 syn match stanzaNumber "\<-\?\d\+\.\d*\%(e[\-0-9]\+\)\?[fF]\?"
-syn match stanzaNumber "\<-\?0x\x\+[LY]\?\>"
+syn match stanzaNumber "\<-\?0x\x\+[lLyY]\?\>"
 syn match stanzaNumber "\<-\?0o\o\+\>"
 syn match stanzaNumber "\<0b[01]\+\>"
-syn cluster stanzaAnonFnTop add=stanzaNumber
 
 syn match stanzaCharacter "'\%(\\[abfnrtv'"\\]\|.\)'"
-syn cluster stanzaAnonFnTop add=stanzaCharacter
 
 syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaContinuation,stanzaFormatSpecifier
-syn cluster stanzaAnonFnTop add=stanzaString
 
 syn match stanzaFormatSpecifier "%[_*,~@]" contained
 syn match stanzaEscape +\\[abfnrtv"\\]+ contained
 syn match stanzaContinuation "\\\n\s*" contained
 
-syn region stanzaAnonymousFn start="{" end="}" contains=@stanzaAnonFnTop,stanzaAnonymousParameter
+syn region stanzaAnonymousFn start="{" end="}" contains=@stanzaAnonFnTop,stanzaAnonymousParameter transparent
+syn cluster stanzaAnonFnTop contains=@stanzaCommonTop,stanzaException,stanzaThis,stanzaSymbol
+
 syn match stanzaAnonymousParameter "_\d\?" display contained
-syn cluster stanzaAnonFnTop add=stanzaAnonymousFn
 
 syn region stanzaRawString matchgroup=stanzaQuotes start="\\\z(<\k\+>\)" end=+\z1+
-syn cluster stanzaAnonFnTop add=stanzaRawString
 
-syn match stanzaSymbol "`\k\+" display
-syn cluster stanzaAnonFnTop add=stanzaSymbol
-
-syn sync match stanzaSync grouphere NONE "^\s*\%(\%(public\|private\|protected\)\s*\)\?\%(defpackage\|defn\|defstruct\)\s\+\K\k*:"
+syn sync match stanzaSync grouphere NONE "^\s*\%(\%(public\|private\|protected\)\s*\)\?\%(defpackage\|defn\|defstruct\)\s\+\K\k*"
 
 hi def link stanzaAccess StorageClass
 hi def link stanzaAnnotatedType Type
@@ -132,9 +124,12 @@ hi def link stanzaTypeOperator Operator
 hi def link stanzaThis Constant
 hi def link stanzaVariableDefinition Statement
 hi def link stanzaAnonymousParameter Macro
-hi def link stanzaNull constant
+hi def link stanzaNull Constant
 hi def link stanzaLostanzaKeywords Statement
+hi def link stanzaLostanzaKeywordsError Error
 hi def link stanzaTabError Error
+hi def link stanzaFatal PreCondit
+hi def link stanzaTodo Todo
 
 " }}}
 " JITX stuff{{{1
