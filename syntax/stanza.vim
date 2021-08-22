@@ -139,6 +139,9 @@ if s:added_syntax != ""
     " Restrict runtimepath so we only load Stanza syntax modules
     let s:saved_runtimepath = &runtimepath
     let s:this_runtimepath = expand('<sfile>:p:h')
+    if has_key(g:, 'stanza_syntax_modules')
+        let s:this_runtimepath .= ','.g:stanza_syntax_modules
+    endif
     exec 'set runtimepath='.s:this_runtimepath
     exec 'runtime! '.s:added_syntax.'.vim'
     exec 'set runtimepath='.s:saved_runtimepath
