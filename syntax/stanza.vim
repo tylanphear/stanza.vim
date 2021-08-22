@@ -8,7 +8,6 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-" Stanza stuff {{{1
 syn keyword stanzaKeyword in let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do return val var
 syn keyword stanzaException try catch finally throw
 syn keyword stanzaConditional if else when
@@ -131,36 +130,19 @@ hi def link stanzaTabError Error
 hi def link stanzaFatal PreCondit
 hi def link stanzaTodo Todo
 
-" }}}
-" JITX stuff{{{1
-
 " Grab the first line of the file and check for a #use-added-syntax directive
 let s:first_line_of_file = getline(1)
 let s:syntax_matches = matchlist(s:first_line_of_file, "#use-added-syntax(\\(.\\{-}\\))")
 let s:added_syntax = get(s:syntax_matches, 1, "")
 
-if s:added_syntax == "jitx" || s:added_syntax == "esir"
-    syn keyword jitxKeyword pcb-module pcb-symbol pcb-component pcb-package pcb-design pcb-pad pcb-board pcb-landpattern pcb-material pcb-stackup
-    syn keyword jitxKeyword port pin net require pad unique self
-    syn keyword jitxKeyword at on
-    syn keyword jitxType Bottom Top
-
-    syn keyword jitxBuiltinFn place instances symbol property ref reference-designator schematic-group loc layer
-
-    syn match jitxKeyword "^\s*\(public\|private\|protected\)\?\s*inst"hs=e-4 nextgroup=jitxInstName contains=stanzaAccess
-    syn match jitxInstName "[^:]*" display contained
-
-    syn match jitxKeyword "^\s*\(public\|private\|protected\)\?\s*net"hs=e-3 nextgroup=jitxNetName contains=stanzaAccess
-    syn match jitxNetName "[^()]*" display contained nextgroup=jitxTypeAnnotation
-
-    syn region jitxTypeAnnotation start=":" end="$" contained contains=jitxType
-    syn match jitxType "\K[^\s]*" contained
-
-    hi def link jitxKeyword Statement
-    hi def link jitxBuiltinFn Macro
-    hi def link jitxInstName Identifier
-    hi def link jitxNetName Identifier
-    hi def link jitxType Type
+if s:added_syntax != ""
+    " Restrict runtimepath so we only load Stanza syntax modules
+    let s:saved_runtimepath = &runtimepath
+    let s:this_runtimepath = expand('<sfile>:p:h')
+    exec 'set runtimepath='.s:this_runtimepath
+    exec 'runtime! '.s:added_syntax.'.vim'
+    exec 'set runtimepath='.s:saved_runtimepath
+    unlet s:saved_runtimepath s:this_runtimepath
 endif
 
 let &cpo = s:saved_cpo
@@ -169,6 +151,3 @@ unlet s:saved_cpo
 unlet s:first_line_of_file s:syntax_matches s:added_syntax
 
 let b:current_syntax = "stanza"
-
-"}}}
-" vim: foldmethod=marker:
