@@ -67,19 +67,46 @@ syn match stanzaCapture "?\w\+" display
 syn match stanzaSymbol "`\k\+" display
 syn match stanzaDirective "\k\@<!#\K\k*"
 
-syn match stanzaNumber "\<-\?\d\+[lLyY]\?\>"
+syn match stanzaNumber "\<-\?\d\{1,3\}[yY]\>"
+syn match stanzaNumber "\<-\?\d\{1,12\}\>"
+syn match stanzaNumber "\<-\?\d\{1,19\}[lL]\>"
+syn match stanzaNumberError "\<-\?\d\{4,\}[yY]\>"
+syn match stanzaNumberError "\<-\?\d\{13,\}\>"
+syn match stanzaNumberError "\<-\?\d\{20,\}[lL]\>"
+
+syn match stanzaNumber "\<-\?0x\x\{1,2\}[yY]\>"
+syn match stanzaNumber "\<-\?0x\x\{1,8\}\>"
+syn match stanzaNumber "\<-\?0x\x\{1,16\}[lL]\?\>"
+syn match stanzaNumberError "\<-\?0x\x\{3,\}[yY]\>"
+syn match stanzaNumberError "\<-\?0x\x\{9,\}\>"
+syn match stanzaNumberError "\<-\?0x\x\{17,\}[lL]\?\>"
+
+syn match stanzaNumber "\<-\?0o\o\{1,3\}[yY]\>"
+syn match stanzaNumber "\<-\?0o\o\{1,11\}\>"
+syn match stanzaNumber "\<-\?0o\o\{1,22\}[lL]\>"
+syn match stanzaNumberError "\<-\?0o\o\{4,\}[yY]\>"
+syn match stanzaNumberError "\<-\?0o\o\{12,\}\>"
+syn match stanzaNumberError "\<-\?0o\o\{23,\}[lL]\>"
+
+syn match stanzaNumber "\<0b[01]\{1,8\}[yY]\>"
+syn match stanzaNumber "\<0b[01]\{1,32\}\>"
+syn match stanzaNumber "\<0b[01]\{1,64\}[lL]\>"
+syn match stanzaNumberError "\<0b[01]\{9,\}[yY]\>"
+syn match stanzaNumberError "\<0b[01]\{33,\}\>"
+syn match stanzaNumberError "\<0b[01]\{65,\}[lL]\>"
+
 syn match stanzaNumber "\<-\?\d\+\.\d*\%(e[\-0-9]\+\)\?[fF]\?"
-syn match stanzaNumber "\<-\?0x\x\+[lLyY]\?\>"
-syn match stanzaNumber "\<-\?0o\o\+\>"
-syn match stanzaNumber "\<0b[01]\+\>"
 
-syn match stanzaCharacter "'\%(\\[abfnrtv'"\\]\|.\)'"
+syn match stanzaCharacter "'\%(\\.\|.\)'" contains=stanzaEscape,stanzaEscapeError
+syn match stanzaCharacterError "''"
+syn match stanzaCharacterError "'\%([^\\][^']\{1,\}\|\\[^']\{2,\}\)'"
 
-syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaContinuation,stanzaFormatSpecifier
+syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier
 
 syn match stanzaFormatSpecifier "%[_*,~@]" contained
-syn match stanzaEscape +\\[abfnrtv"\\]+ contained
 syn match stanzaContinuation "\\\n\s*" contained
+syn match stanzaEscape +\\[bnrt'"\\]+ contained
+syn match stanzaEscapeError "\\[^bnrt'"\\]" contained
 
 syn region stanzaAnonymousFn start="{" end="}" contains=@stanzaAnonFnTop,stanzaAnonymousParameter transparent
 syn cluster stanzaAnonFnTop contains=@stanzaCommonTop,stanzaException,stanzaThis,stanzaSymbol
@@ -127,6 +154,9 @@ hi def link stanzaNull Constant
 hi def link stanzaLostanzaKeywords Statement
 hi def link stanzaLostanzaKeywordsError Error
 hi def link stanzaTabError Error
+hi def link stanzaNumberError Error
+hi def link stanzaEscapeError Error
+hi def link stanzaCharacterError Error
 hi def link stanzaFatal PreCondit
 hi def link stanzaTodo Todo
 
