@@ -145,12 +145,9 @@ if s:added_syntax != ""
     exec 'set runtimepath='.s:this_runtimepath
     exec 'runtime! '.s:added_syntax.'.vim'
     exec 'set runtimepath='.s:saved_runtimepath
-    unlet s:saved_runtimepath s:this_runtimepath
 endif
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
-
-unlet s:first_line_of_file s:syntax_matches s:added_syntax
 
 let b:current_syntax = "stanza"
