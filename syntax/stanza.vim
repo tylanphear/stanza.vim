@@ -119,7 +119,8 @@ syn match stanzaAnonymousParameter "_\d\?" display contained
 
 syn region stanzaRawString matchgroup=stanzaQuotes start="\\\z(<\k\+>\)" end=+\z1+
 
-syn match stanzaFunctionCall "\K\k*[<(]"me=e-1,he=e-1
+syn match stanzaFunctionCall "\K\k*\ze("
+syn match stanzaFunctionCall "\K\k*\ze\%(<\K\k*>\)\?("
 
 syn sync match stanzaSync grouphere NONE "^\s*\%(\%(public\|private\|protected\)\s*\)\?\%(defpackage\|defn\|defstruct\)\s\+\K\k*"
 
