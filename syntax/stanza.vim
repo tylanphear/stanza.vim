@@ -23,8 +23,9 @@ syn keyword stanzaFatal fatal fatal!
 syn keyword stanzaKeyword defsyntax defrule defproduction fail-if nextgroup=stanzaMacroName skipwhite
 syn match stanzaMacroName display contained "\K\k*"
 
-syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)defpackage" matchgroup=NONE end="^\z1\S"me=e-1 contains=stanzaInclude,stanzaOperator,stanzaTabError
+syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)defpackage" matchgroup=NONE end="^\z1\S"me=e-1 contains=stanzaInclude,stanzaOperator,stanzaTabError,stanzaImportPrefix
 syn keyword stanzaInclude contained from import with
+syn match stanzaImportPrefix "prefix("me=e-1,he=e-1 contained
 
 syn cluster stanzaCommonTop contains=stanzaKeyword,stanzaConditional,stanzaRepeat,stanzaBoolean,stanzaBuiltinType,stanzaDirective,stanzaOperator,stanzaTypeOperator,stanzaNumber,stanzaComment,stanzaBlockComment,stanzaString,stanzaRawString,stanzaTabError
 
@@ -33,6 +34,9 @@ syn cluster stanzaLostanzaTop contains=@stanzaCommonTop,stanzaLostanzaBuiltinTyp
 syn keyword stanzaLostanzaBuiltinType int byte ref long float double ptr contained
 syn keyword stanzaLostanzaKeywords call-c call-prim goto sizeof labels contained
 
+syn region stanzaExternDecl matchgroup=stanzaKeyword start="extern" matchgroup=NONE end="$" contains=@stanzaLostanzaTop,stanzaExternFunctionName oneline
+syn match stanzaExternFunctionName "\K\k*:"me=e-1,he=e-1 contained
+
 syn match stanzaTabError "\t\+" display
 
 syn keyword stanzaKeyword deftest nextgroup=stanzaTestParams,stanzaTestCase
@@ -40,7 +44,7 @@ syn region stanzaTestParams start="(" end=")" display contained contains=stanzaT
 syn match stanzaTestParam "\K\k*" display contained
 syn match stanzaTestCase ")\? .\{-}:"hs=s+1,he=e-1 display contained
 
-syn keyword stanzaKeyword defn defn* defmulti defmethod extern nextgroup=stanzaFunctionName skipwhite
+syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
 syn match stanzaFunctionName "\K\k*" display contained
 
 syn keyword stanzaKeyword defstruct deftype defenum nextgroup=stanzaStructName skipwhite
@@ -115,6 +119,8 @@ syn match stanzaAnonymousParameter "_\d\?" display contained
 
 syn region stanzaRawString matchgroup=stanzaQuotes start="\\\z(<\k\+>\)" end=+\z1+
 
+syn match stanzaFunctionCall "\K\k*[<(]"me=e-1,he=e-1
+
 syn sync match stanzaSync grouphere NONE "^\s*\%(\%(public\|private\|protected\)\s*\)\?\%(defpackage\|defn\|defstruct\)\s\+\K\k*"
 
 hi def link stanzaAccess StorageClass
@@ -133,7 +139,10 @@ hi def link stanzaContinuation Special
 hi def link stanzaException Exception
 hi def link stanzaFormatSpecifier Special
 hi def link stanzaFunctionName Function
+hi def link stanzaFunctionCall Function
+hi def link stanzaExternFunctionName stanzaFunctionName
 hi def link stanzaInclude Include
+hi def link stanzaImportPrefix StorageClass
 hi def link stanzaKeyword Statement
 hi def link stanzaNumber Number
 hi def link stanzaOperator Operator

@@ -64,7 +64,7 @@ endfunction
 
 let b:undo_indent = "
             \setlocal lisp< autoindent< indentexpr< indentkeys<
-            \| delfunction! GetStanzaIndent"
+            \|delfunction! GetStanzaIndent"
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo

@@ -21,7 +21,23 @@ setlocal commentstring=;\ %s
 
 setlocal formatoptions-=t formatoptions+=croqnl
 
-let b:undo_ftplugin = "setlocal iskeyword< cinkeys< indentkeys< include< define< comments< commentstring< formatoptions<"
+function! FindStanzaEntity()
+    let l:word = expand('<cword>')
+    let l:pattern = '(defn|defmethod|defstruct|deftype|defenum)'
+    if search(escape(l:pattern, '()|').' '.l:word.'\>', 'w') != 0
+        " Add this location to the jumplist -- search() doesn't do that,
+        " despite setting the cursor there
+        k '
+    else
+        if exists('*FindStanzaEntityFallback')
+            call FindStanzaEntityFallback(l:pattern, l:word)
+        endif
+    endif
+endfunction!
+
+let b:undo_ftplugin = "
+            \setlocal iskeyword< cinkeys< indentkeys< include< define< comments< commentstring< formatoptions<
+            \|delfunction! FindStanzaEntity"
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
