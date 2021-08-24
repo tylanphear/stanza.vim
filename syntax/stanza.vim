@@ -68,7 +68,8 @@ syn region stanzaBlockComment start=";\z(<[^>]*>\)" end="\z1" contains=stanzaTod
 
 syn match stanzaCapture "?\w\+" display
 
-syn match stanzaSymbol "`\k\+" display
+" Stanza symbols can also contain forward slashes
+syn match stanzaSymbol "`\%(\k\|/\)\+" display
 syn match stanzaDirective "\k\@<!#\K\k*"
 
 syn match stanzaNumber "\<-\?\d\{1,3\}[yY]\>"
