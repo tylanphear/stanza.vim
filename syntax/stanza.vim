@@ -44,8 +44,8 @@ syn region stanzaLostanza matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|
 " LoStanza types that are invalid outside of `lostanza` or `extern`
 syn keyword stanzaLostanzaBuiltinType byte int long float double ref ptr contained containedin=stanzaLostanza,stanzaExternDecl
 
-" LoStanza keywords that are invalid outside of `lostanza` or `extern`
-syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels contained containedin=stanzaLostanza,stanzaExternDecl
+" LoStanza keywords that are invalid outside of `lostanza`
+syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels contained containedin=stanzaLostanza
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
@@ -74,7 +74,7 @@ syn keyword stanzaTodo TODO FIXME NOTE
 syn region stanzaComment start=";" end="$" contains=stanzaTodo,@Spell oneline
 
 " A block comment is started with ;<TAG> and then ended by <TAG>
-syn region stanzaBlockComment start=";\z(<[^>]*>\)" end="\z1" contains=stanzaTodo,@Spell
+syn region stanzaBlockComment start=";<\z([^>]*\)>" end="<\z1>" contains=stanzaTodo,@Spell
 
 " Captured type arguments (e.g. `defn foo<?T>`) or captured syntax match
 " groups (e.g. `?tag:id`)
@@ -117,15 +117,17 @@ syn match stanzaNumberError "\<0b[01]\{9,\}[yY]\>"
 syn match stanzaNumberError "\<0b[01]\{33,\}\>"
 syn match stanzaNumberError "\<0b[01]\{65,\}[lL]\>"
 
+" Stanza float/doubles
 syn match stanzaFloat "\<-\?\d\+\.\d*\%(e[\-0-9]\+\)\?[fF]\?"
 
+" Stanza characters, as well as some associated errors
 syn match stanzaCharacter "'\%(\\.\|.\)'" contains=stanzaEscape,stanzaEscapeError
 syn match stanzaCharacterError "''"
-syn match stanzaCharacterError "'\%([^\\][^']\{1,\}\|\\[^']\{2,\}\)'"
+syn match stanzaCharacterError "'\%([^\\][^']\{1,\}\|\\[^']\{2,\}\)'\?"
 
 syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier
 
-syn region stanzaRawString matchgroup=stanzaQuotes start="\\\z(<\k\+>\)" end=+\z1+ contains=stanzaFormatSpecifier
+syn region stanzaRawString matchgroup=stanzaQuotes start="\\<\z([^>]*\)>" end="<\z1>" contains=stanzaFormatSpecifier
 
 syn match stanzaFormatSpecifier "%[_*,~@]" contained
 syn match stanzaContinuation "\\\ze\n\s*" contained
