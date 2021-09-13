@@ -138,11 +138,16 @@ syn region stanzaAnonymousFn start="{" end="}" contains=TOP
 
 syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAnonymousFn
 
+" Function calls (e.g. `foo(...)`)
 syn match stanzaFunctionCall "\K\k*\ze("
 syn match stanzaFunctionCall "\K\k*\ze\%(<\K\%(\k\|,\|\s\)*>\)\?("
 
+" Curried function calls (e.g. `foo{...}`)
 syn match stanzaCurriedFunctionCall "\K\k*\ze{" nextgroup=stanzaAnonymousFn
 syn match stanzaCurriedFunctionCall "\K\k*\ze\%(<\K\%(\k\|,\|\s\)*>\)\?{" nextgroup=stanzaAnonymousFn
+
+" Applied function calls (e.g. `foo $ ...`)
+syn match stanzaAppliedFunction "\K\k*\ze\s\+\$"
 
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
@@ -169,6 +174,7 @@ hi def link stanzaFormatSpecifier Special
 hi def link stanzaFunctionName Function
 hi def link stanzaFunctionCall Function
 hi def link stanzaCurriedFunctionCall stanzaFunctionCall
+hi def link stanzaAppliedFunction stanzaFunctionCall
 hi def link stanzaExtern stanzaKeyword
 hi def link stanzaExternFunctionName stanzaFunctionName
 hi def link stanzaInclude Include
