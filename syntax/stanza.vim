@@ -22,7 +22,7 @@ syn keyword stanzaFatal fatal fatal!
 
 syn keyword stanzaKeyword val var nextgroup=stanzaBindingName skipwhite
 syn match stanzaBindingName "\K\k*" contained nextgroup=stanzaVariableType skipwhite
-syn region stanzaVariableType matchgroup=stanzaOperator start=":" end="=\|$" contains=stanzaCompositeType
+syn region stanzaVariableType matchgroup=stanzaOperator start=":" end="=\|$" contains=stanzaCompositeType,@stanzaComments
 
 " Defined as a match group instead of a set of keywords. This is technically
 " incorrect, but is done so that later matches that can contain access
@@ -71,11 +71,11 @@ syn region stanzaFunctionParam matchgroup=stanzaOperator start=":" matchgroup=NO
 syn region stanzaFunctionReturn matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
 
-syn match stanzaCompositeType "\K\%(\k\|[<>|&]\|\s\)*" contained contains=stanzaType,stanzaAndOr,stanzaAngleBrackets,stanzaCapture,stanzaQuestionType
+syn match stanzaCompositeType "\K\k*\%(<[^>]*>\)\?" contained contains=stanzaType,stanzaAngleBrackets,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
 syn match stanzaType "\K\k*" contained
 
 syn match stanzaAngleBrackets "<\|>" contained
-syn match stanzaAndOr "|\|&" contained
+syn match stanzaAndOr "|\|&" contained nextgroup=stanzaCompositeType
 
 " Struct/type/enum definition (e.g. `deftype Foo`)
 syn keyword stanzaKeyword defstruct deftype defenum nextgroup=stanzaStructName skipwhite
