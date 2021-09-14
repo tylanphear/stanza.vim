@@ -1,1 +1,1 @@
-au BufNewFile,BufRead *.stanza,*.jitx set ft=stanza
+au BufNewFile,BufRead *.stanza set ft=stanza
