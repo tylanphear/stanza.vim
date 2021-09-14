@@ -75,7 +75,7 @@ syn match stanzaCompositeType "\K\k*\%(<[^>]*>\)\?" contained contains=stanzaTyp
 syn match stanzaType "\K\k*" contained
 
 syn match stanzaAngleBrackets "<\|>" contained
-syn match stanzaAndOr "|\|&" contained nextgroup=stanzaCompositeType
+syn match stanzaAndOr "|\|&" contained nextgroup=stanzaCompositeType skipwhite
 
 " Struct/type/enum definition (e.g. `deftype Foo`)
 syn keyword stanzaKeyword defstruct deftype defenum nextgroup=stanzaStructName skipwhite
