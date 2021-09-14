@@ -8,17 +8,21 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-syn keyword stanzaKeyword in let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do val var
+syn keyword stanzaKeyword let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do
 syn keyword stanzaException try catch finally throw
 syn keyword stanzaConditional if else when
-syn keyword stanzaRepeat for while
+syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
 syn keyword stanzaThis this
 syn keyword stanzaBuiltinType True False Byte Int Long Float Double String Char Void Symbol
 syn keyword stanzaQuestionType ?
-syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaAnnotatedType skipwhite
+syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaCompositeType skipwhite
 syn keyword stanzaNull null
 syn keyword stanzaFatal fatal fatal!
+
+syn keyword stanzaKeyword val var nextgroup=stanzaBindingName skipwhite
+syn match stanzaBindingName "\K\k*" contained nextgroup=stanzaVariableType skipwhite
+syn region stanzaVariableType matchgroup=stanzaOperator start=":" end="=\|$" contains=stanzaCompositeType
 
 " Defined as a match group instead of a set of keywords. This is technically
 " incorrect, but is done so that later matches that can contain access
@@ -29,17 +33,22 @@ syn match stanzaAccess "public\|protected\|private"
 " (Stanza doesn't allow tabs!)
 syn match stanzaTabError "\t\+" display
 
+" Operators that can't appear in Stanza identifiers
+syn match stanzaOperator "\%(:\||\|&\|\$>\|<\|<=\|>\|>=\|=>\)"
+" Operators that *can* appear in Stanza identifiers
+syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
+
 syn keyword stanzaKeyword defsyntax defrule defproduction fail-if nextgroup=stanzaMacroName skipwhite
 syn match stanzaMacroName display contained "\K\k*"
 
 " Package definition (e.g. `defpackage Foo:\n import Bar`)
-syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\z1\s\+" end="^" contains=TOP
+syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
 syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition
 
 " LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
 " NOTE: some syntax items are only allowed in `lostanza` definitions and
 " should only be highlighted within them.
-syn region stanzaLostanza matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza" matchgroup=NONE skip="^\z1\s\+" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall
+syn region stanzaLostanza matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall,stanzaAppliedFunction
 
 " LoStanza types that are invalid outside of `lostanza` or `extern`
 syn keyword stanzaLostanzaBuiltinType byte int long float double ref ptr contained containedin=stanzaLostanza,stanzaExternDecl
@@ -50,24 +59,30 @@ syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels con
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
 syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionType skipwhite
-syn region stanzaExternFunctionType matchgroup=stanzaOperator start=":" matchgroup=NONE end="$" contains=stanzaLostanzaBuiltinType,stanzaQuestionType oneline
+syn region stanzaExternFunctionType matchgroup=stanzaOperator start=":" matchgroup=NONE end="$" contained contains=stanzaLostanzaBuiltinType,stanzaQuestionType oneline
 
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
-syn match stanzaFunctionName "\K\k*" display contained
+syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
+syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaCapture nextgroup=stanzaFunctionParams skipwhite
+syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParam,stanzaFunctionParams,stanzaThis nextgroup=stanzaFunctionReturn skipwhite
+syn region stanzaFunctionNestedParams start="(" end=")" contained contains=stanzaFunctionNestedParams,stanzaCompositeType nextgroup=stanzaFunctionNestedReturn skipwhite
+syn region stanzaFunctionParam matchgroup=stanzaOperator start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType
+syn region stanzaFunctionReturn matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType
+syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
+
+syn match stanzaCompositeType "\K\%(\k\|[<>|&]\)*" contained contains=stanzaCompositeTypeInner,stanzaAndOr,stanzaAngleBrackets
+syn match stanzaCompositeTypeInner "\K\k*" contained
+
+syn match stanzaAngleBrackets "<\|>" contained
+syn match stanzaAndOr "|\|&" contained
 
 " Struct/type/enum definition (e.g. `deftype Foo`)
 syn keyword stanzaKeyword defstruct deftype defenum nextgroup=stanzaStructName skipwhite
 syn match stanzaStructName "\K\k*" display contained
 
-" Operators that can't appear in Stanza identifiers
-syn match stanzaOperator "\%(:\||\|&\|\$>\|<\|<=\|<\|>=\|>\|=>\)"
-" Operators that *can* appear in Stanza identifiers
-syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
-
-" This has to come *after* the matches for `:`, `<`, `-`, and `>` so it takes priority
-syn match stanzaTypeAnnotation "\%(->\|<:\)" nextgroup=stanzaAnnotatedType skipwhite
-syn match stanzaAnnotatedType "\K\k*" display contained
+" This has to come *after* the matches for `<` and `:` so it takes priority
+syn match stanzaTypeAnnotation "<:" nextgroup=stanzaCompositeType skipwhite
 
 syn keyword stanzaTodo TODO FIXME NOTE
 
@@ -153,15 +168,16 @@ syn match stanzaAppliedFunction "\K\k*\ze\s\+\$"
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
 syn match stanzaDirective "\k\@<!#\K\k*"
 
-syn sync match stanzaSync grouphere NONE "^\s*\%(\%(public\|private\|protected\)\s*\)\?\%(defpackage\|defn\|defstruct\)\s\+\K\k*"
+syn sync match stanzaSync grouphere stanzaLostanza "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*"
 
 hi def link stanzaAccess StorageClass
-hi def link stanzaAnnotatedType Type
+hi def link stanzaType Type
+hi def link stanzaCompositeTypeInner stanzaType
 hi def link stanzaBlockComment Comment
 hi def link stanzaBoolean Boolean
-hi def link stanzaBuiltinType Type
-hi def link stanzaQuestionType Type
-hi def link stanzaLostanzaBuiltinType Type
+hi def link stanzaBuiltinType stanzaType
+hi def link stanzaQuestionType stanzaType
+hi def link stanzaLostanzaBuiltinType stanzaType
 hi def link stanzaCapture Type
 hi def link stanzaCharacter String
 hi def link stanzaComment Comment
@@ -183,6 +199,7 @@ hi def link stanzaKeyword Statement
 hi def link stanzaNumber Number
 hi def link stanzaFloat Float
 hi def link stanzaOperator Operator
+hi def link stanzaAngleBrackets stanzaOperator
 hi def link stanzaQuotes String
 hi def link stanzaRawString String
 hi def link stanzaRepeat Repeat
@@ -191,15 +208,17 @@ hi def link stanzaStructName Structure
 hi def link stanzaSymbol Macro
 hi def link stanzaTypeAnnotation Operator
 hi def link stanzaTypeOperator Operator
+hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
 hi def link stanzaVariableDefinition Statement
 hi def link stanzaAnonymousParameter Macro
 hi def link stanzaNull Constant
 hi def link stanzaLostanzaKeyword stanzaKeyword
-hi def link stanzaTabError Error
-hi def link stanzaNumberError Error
-hi def link stanzaEscapeError Error
-hi def link stanzaCharacterError Error
+hi def link stanzaError Error
+hi def link stanzaTabError stanzaError
+hi def link stanzaNumberError stanzaError
+hi def link stanzaEscapeError stanzaError
+hi def link stanzaCharacterError stanzaError
 hi def link stanzaFatal PreCondit
 hi def link stanzaTodo Todo
 
