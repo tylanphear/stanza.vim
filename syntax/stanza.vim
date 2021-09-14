@@ -64,15 +64,15 @@ syn region stanzaExternFunctionType matchgroup=stanzaOperator start=":" matchgro
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
 syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
-syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaCapture nextgroup=stanzaFunctionParams skipwhite
-syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParam,stanzaFunctionParams,stanzaThis nextgroup=stanzaFunctionReturn skipwhite
+syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite
+syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParam,stanzaFunctionParams,stanzaThis,@stanzaComments nextgroup=stanzaFunctionReturn skipwhite
 syn region stanzaFunctionNestedParams start="(" end=")" contained contains=stanzaFunctionNestedParams,stanzaCompositeType nextgroup=stanzaFunctionNestedReturn skipwhite
-syn region stanzaFunctionParam matchgroup=stanzaOperator start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType
-syn region stanzaFunctionReturn matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType
+syn region stanzaFunctionParam matchgroup=stanzaOperator start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType,@stanzaComments
+syn region stanzaFunctionReturn matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
 
-syn match stanzaCompositeType "\K\%(\k\|[<>|&]\)*" contained contains=stanzaCompositeTypeInner,stanzaAndOr,stanzaAngleBrackets
-syn match stanzaCompositeTypeInner "\K\k*" contained
+syn match stanzaCompositeType "\K\%(\k\|[<>|&]\|\s\)*" contained contains=stanzaType,stanzaAndOr,stanzaAngleBrackets,stanzaCapture,stanzaQuestionType
+syn match stanzaType "\K\k*" contained
 
 syn match stanzaAngleBrackets "<\|>" contained
 syn match stanzaAndOr "|\|&" contained
@@ -91,9 +91,11 @@ syn region stanzaComment start=";" end="$" contains=stanzaTodo,@Spell oneline
 " A block comment is started with ;<TAG> and then ended by <TAG>
 syn region stanzaBlockComment start=";<\z([^>]*\)>" end="<\z1>" contains=stanzaTodo,@Spell
 
+syn cluster stanzaComments contains=stanzaComment,stanzaBlockComment
+
 " Captured type arguments (e.g. `defn foo<?T>`) or captured syntax match
 " groups (e.g. `?tag:id`)
-syn match stanzaCapture "?\w\+" display
+syn match stanzaCapture "?\K\k*" display
 
 " Stanza symbols can also contain forward slashes
 syn match stanzaSymbol "`\%(\k\|/\)\+" display
@@ -178,8 +180,8 @@ hi def link stanzaBoolean Boolean
 hi def link stanzaBuiltinType stanzaType
 hi def link stanzaQuestionType stanzaType
 hi def link stanzaLostanzaBuiltinType stanzaType
-hi def link stanzaCapture Type
-hi def link stanzaCharacter String
+hi def link stanzaCapture Special
+hi def link stanzaCharacter Character
 hi def link stanzaComment Comment
 hi def link stanzaConditional Conditional
 hi def link stanzaDirective PreProc
@@ -194,23 +196,21 @@ hi def link stanzaAppliedFunction stanzaFunctionCall
 hi def link stanzaExtern stanzaKeyword
 hi def link stanzaExternFunctionName stanzaFunctionName
 hi def link stanzaInclude Include
-hi def link stanzaImportPrefix StorageClass
 hi def link stanzaKeyword Statement
 hi def link stanzaNumber Number
 hi def link stanzaFloat Float
 hi def link stanzaOperator Operator
 hi def link stanzaAngleBrackets stanzaOperator
-hi def link stanzaQuotes String
-hi def link stanzaRawString String
-hi def link stanzaRepeat Repeat
 hi def link stanzaString String
+hi def link stanzaQuotes stanzaString
+hi def link stanzaRawString stanzaString
+hi def link stanzaRepeat Repeat
 hi def link stanzaStructName Structure
 hi def link stanzaSymbol Macro
 hi def link stanzaTypeAnnotation Operator
 hi def link stanzaTypeOperator Operator
 hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
-hi def link stanzaVariableDefinition Statement
 hi def link stanzaAnonymousParameter Macro
 hi def link stanzaNull Constant
 hi def link stanzaLostanzaKeyword stanzaKeyword
