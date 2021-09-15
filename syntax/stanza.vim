@@ -8,7 +8,7 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-syn keyword stanzaKeyword let let-var where with within label switch match to through by not and or fn fn* generate yield break attempt do
+syn keyword stanzaKeyword let let-var where with within label switch to through by not and or fn fn* generate yield break attempt do
 syn keyword stanzaException try catch finally throw
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while in
@@ -22,19 +22,21 @@ syn keyword stanzaFatal fatal fatal!
 
 syn keyword stanzaKeyword val var nextgroup=stanzaBindingName skipwhite
 syn match stanzaBindingName "\K\k*" contained nextgroup=stanzaVariableType skipwhite
-syn region stanzaVariableType matchgroup=stanzaOperator start=":" end="=\|$" contains=stanzaCompositeType,@stanzaComments
+syn region stanzaVariableType matchgroup=stanzaColon start=":" matchgroup=stanzaOperator end="=\|$" contains=stanzaCompositeType,@stanzaComments
 
-" Defined as a match group instead of a set of keywords. This is technically
-" incorrect, but is done so that later matches that can contain access
-" specifiers (like `stanzaLostanza`) can override this match.
+" Defined as a match group instead of a set of keywords. This is done so that
+" later matches that can contain access specifiers (like `stanzaLostanza`) can
+" override this match.
 syn match stanzaAccess "public\|protected\|private"
 
 " Any kind of tabs outside of strings and comments are an error in Stanza
 " (Stanza doesn't allow tabs!)
 syn match stanzaTabError "\t\+" display
 
+syn match stanzaColon ":"
+
 " Operators that can't appear in Stanza identifiers
-syn match stanzaOperator "\%(:\||\|&\|<\|<=\|>\|>=\|=>\)"
+syn match stanzaOperator "\%(|\|&\|<\|<=\|>\|>=\|=>\)"
 " Operators that *can* appear in Stanza identifiers
 syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
 
@@ -59,7 +61,7 @@ syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels con
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
 syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionType skipwhite
-syn region stanzaExternFunctionType matchgroup=stanzaOperator start=":" matchgroup=NONE end="$" contained contains=stanzaLostanzaBuiltinType,stanzaQuestionType oneline
+syn region stanzaExternFunctionType matchgroup=stanzaColon start=":" matchgroup=NONE end="$" contained contains=stanzaLostanzaBuiltinType,stanzaQuestionType oneline
 
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
@@ -67,7 +69,7 @@ syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionP
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">\|$" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite
 syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParamType,stanzaFunctionParams,stanzaThis,@stanzaComments nextgroup=stanzaFunctionReturnType skipwhite
 syn region stanzaFunctionNestedParams start="(" end=")" contained contains=stanzaFunctionNestedParams,stanzaCompositeType nextgroup=stanzaFunctionNestedReturn skipwhite
-syn region stanzaFunctionParamType matchgroup=stanzaOperator start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType,@stanzaComments
+syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionReturnType matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
 
@@ -101,6 +103,10 @@ syn match stanzaCapture "?\K\k*" display
 
 " Stanza symbols can also contain forward slashes
 syn match stanzaSymbol "`\%(\k\|/\)\+" display
+
+syn region stanzaMatch matchgroup=stanzaKeyword start="^\z(\s*\)\<match\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn match stanzaMatchArm "^\s*([^:]*:\s*[^) ]*\s*)\?\ze:\?" contained containedin=stanzaMatch contains=TOP
+syn match stanzaMatchArmType ":\s*[^) ]*\ze\s*)\?" contained containedin=stanzaMatchArm contains=stanzaCompositeType,stanzaColon,@stanzaComments
 
 " All kinds of Stanza numbers with their associated prefixes and suffixes
 
@@ -208,6 +214,7 @@ hi def link stanzaKeyword Statement
 hi def link stanzaNumber Number
 hi def link stanzaFloat Float
 hi def link stanzaOperator Operator
+hi def link stanzaColon stanzaOperator
 hi def link stanzaAngleBrackets stanzaOperator
 hi def link stanzaString String
 hi def link stanzaQuotes stanzaString
