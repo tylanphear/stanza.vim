@@ -34,7 +34,7 @@ syn match stanzaAccess "public\|protected\|private"
 syn match stanzaTabError "\t\+" display
 
 " Operators that can't appear in Stanza identifiers
-syn match stanzaOperator "\%(:\||\|&\|\$>\|<\|<=\|>\|>=\|=>\)"
+syn match stanzaOperator "\%(:\||\|&\|<\|<=\|>\|>=\|=>\)"
 " Operators that *can* appear in Stanza identifiers
 syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
 
@@ -64,17 +64,19 @@ syn region stanzaExternFunctionType matchgroup=stanzaOperator start=":" matchgro
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
 syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
-syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite
-syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParam,stanzaFunctionParams,stanzaThis,@stanzaComments nextgroup=stanzaFunctionReturn skipwhite
+syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">\|$" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite
+syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParamType,stanzaFunctionParams,stanzaThis,@stanzaComments nextgroup=stanzaFunctionReturnType skipwhite
 syn region stanzaFunctionNestedParams start="(" end=")" contained contains=stanzaFunctionNestedParams,stanzaCompositeType nextgroup=stanzaFunctionNestedReturn skipwhite
-syn region stanzaFunctionParam matchgroup=stanzaOperator start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType,@stanzaComments
-syn region stanzaFunctionReturn matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
+syn region stanzaFunctionParamType matchgroup=stanzaOperator start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType,@stanzaComments
+syn region stanzaFunctionReturnType matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
 
-syn match stanzaCompositeType "\K\k*\%(<[^>]*>\)\?" contained contains=stanzaType,stanzaAngleBrackets,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
+syn match stanzaCompositeType "\K\k*\%(<.\{-}>\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
 syn match stanzaType "\K\k*" contained
 
-syn match stanzaAngleBrackets "<\|>" contained
+" A pair of angle brackets referring to some inner type
+syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaCompositeType
+
 syn match stanzaAndOr "|\|&" contained nextgroup=stanzaCompositeType skipwhite
 
 " Struct/type/enum definition (e.g. `deftype Foo`)
@@ -156,15 +158,20 @@ syn region stanzaAnonymousFn start="{" end="}" contains=TOP
 syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAnonymousFn
 
 " Function calls (e.g. `foo(...)`)
-syn match stanzaFunctionCall "\K\k*\ze("
-syn match stanzaFunctionCall "\K\k*\ze\%(<\K\%(\k\|,\|\s\)*>\)\?("
+syn match stanzaFunctionCall "\K\k*\ze\s*("
+syn match stanzaFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*("
 
 " Curried function calls (e.g. `foo{...}`)
-syn match stanzaCurriedFunctionCall "\K\k*\ze{" nextgroup=stanzaAnonymousFn
-syn match stanzaCurriedFunctionCall "\K\k*\ze\%(<\K\%(\k\|,\|\s\)*>\)\?{" nextgroup=stanzaAnonymousFn
+syn match stanzaCurriedFunctionCall "\K\k*\ze\s*{" nextgroup=stanzaAnonymousFn
+syn match stanzaCurriedFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*{" nextgroup=stanzaAnonymousFn
 
 " Applied function calls (e.g. `foo $ ...`)
-syn match stanzaAppliedFunction "\K\k*\ze\s\+\$"
+syn match stanzaAppliedFunction "\K\k*\ze\s\+\$>\@!"
+syn match stanzaAppliedFunction "\K\k*\ze\%(<.\{-}>\)\?\s*\$>\@!"
+
+" Reverse applied function calls (e.g. `... $> func`)
+syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction skipwhite
+syn match stanzaReverseAppliedFunction "\K\k*" contained
 
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
@@ -193,6 +200,7 @@ hi def link stanzaFunctionName Function
 hi def link stanzaFunctionCall Function
 hi def link stanzaCurriedFunctionCall stanzaFunctionCall
 hi def link stanzaAppliedFunction stanzaFunctionCall
+hi def link stanzaReverseAppliedFunction stanzaFunctionCall
 hi def link stanzaExtern stanzaKeyword
 hi def link stanzaExternFunctionName stanzaFunctionName
 hi def link stanzaInclude Include
