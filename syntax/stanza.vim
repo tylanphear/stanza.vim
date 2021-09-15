@@ -77,7 +77,7 @@ syn match stanzaCompositeType "\K\k*\%(<.\{-}>\)\?" contained contains=stanzaTyp
 syn match stanzaType "\K\k*" contained
 
 " A pair of angle brackets referring to some inner type
-syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaCompositeType
+syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaCompositeType contained
 
 syn match stanzaAndOr "|\|&" contained nextgroup=stanzaCompositeType skipwhite
 
@@ -165,15 +165,15 @@ syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAn
 
 " Function calls (e.g. `foo(...)`)
 syn match stanzaFunctionCall "\K\k*\ze\s*("
-syn match stanzaFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*("
+syn match stanzaFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*(" nextgroup=stanzaOf
 
 " Curried function calls (e.g. `foo{...}`)
 syn match stanzaCurriedFunctionCall "\K\k*\ze\s*{" nextgroup=stanzaAnonymousFn
-syn match stanzaCurriedFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*{" nextgroup=stanzaAnonymousFn
+syn match stanzaCurriedFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*{" nextgroup=stanzaOf
 
 " Applied function calls (e.g. `foo $ ...`)
 syn match stanzaAppliedFunction "\K\k*\ze\s\+\$>\@!"
-syn match stanzaAppliedFunction "\K\k*\ze\%(<.\{-}>\)\?\s*\$>\@!"
+syn match stanzaAppliedFunction "\K\k*\ze\%(<.\{-}>\)\?\s*\$>\@!" nextgroup=stanzaOf
 
 " Reverse applied function calls (e.g. `... $> func`)
 syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction skipwhite
