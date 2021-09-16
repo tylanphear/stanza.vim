@@ -27,7 +27,7 @@ syn region stanzaVariableType matchgroup=stanzaColon start=":" matchgroup=stanza
 " Defined as a match group instead of a set of keywords. This is done so that
 " later matches that can contain access specifiers (like `stanzaLostanza`) can
 " override this match.
-syn match stanzaAccess "public\|protected\|private"
+syn match stanzaAccess "\<public\|protected\|private\>"
 
 " Any kind of tabs outside of strings and comments are an error in Stanza
 " (Stanza doesn't allow tabs!)
