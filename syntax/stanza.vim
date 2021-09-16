@@ -68,12 +68,14 @@ syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunction
 syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">\|$" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite
 syn region stanzaFunctionParams start="(" end=")" contained contains=stanzaFunctionParamType,stanzaFunctionParams,stanzaThis,@stanzaComments nextgroup=stanzaFunctionReturnType skipwhite
-syn region stanzaFunctionNestedParams start="(" end=")" contained contains=stanzaFunctionNestedParams,stanzaCompositeType nextgroup=stanzaFunctionNestedReturn skipwhite
-syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaFunctionNestedParams,stanzaCompositeType,@stanzaComments
+syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained contains=stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionReturnType matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
-syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
 
 syn match stanzaCompositeType "\K\k*\%(<\%(\k\|[<>]\)\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
+syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
+syn region stanzaCompositeType start="(" end=")" contained contains=stanzaCompositeType nextgroup=stanzaOperator skipwhite
+syn match stanzaOperator "->" nextgroup=stanzaCompositeType
+
 syn match stanzaType "\K\k*" contained
 
 " A pair of angle brackets referring to some inner type
@@ -164,7 +166,7 @@ syn match stanzaFunctionCall "\K\k*\ze\s*("
 syn match stanzaFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*(" nextgroup=stanzaOf
 
 " Curried function calls (e.g. `foo{...}`)
-syn match stanzaCurriedFunctionCall "\K\k*\ze\s*{" nextgroup=stanzaAnonymousFn
+syn match stanzaCurriedFunctionCall "\K\k*\ze\s*{" nextgroup=stanzaAnonymousFn skipwhite
 syn match stanzaCurriedFunctionCall "\K\k*\ze\%(<.\{-}>\)\?\s*{" nextgroup=stanzaOf
 
 " Applied function calls (e.g. `foo $ ...`)
@@ -181,14 +183,13 @@ syn match stanzaDirective "\k\@<!#\K\k*"
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
 syn region stanzaMatch matchgroup=stanzaKeyword start="^\z(\s*\)\<match\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn match stanzaMatchClause "\s*(\zs\K\k*:\s*\K\%(\k\|[<>]\)*\ze\s*)\?:\?" contained containedin=stanzaMatch contains=TOP
-syn match stanzaMatchClauseType ":\s*\K\%(\k\|[<>]\)*" contained containedin=stanzaMatchClause contains=stanzaCompositeType,stanzaColon,@stanzaComments
+syn match stanzaMatchClause "(\s*\K\k*\s*:\s*\%([][<>(), ]\|\k\)*\s*)\?" contained containedin=stanzaMatch contains=TOP keepend
+syn match stanzaMatchClauseType ":\%([][<>(), ]\|\k\)*\ze)\?" contained containedin=stanzaMatchClause contains=stanzaCompositeType,stanzaColon,@stanzaComments
 
 syn sync match stanzaSync grouphere stanzaLostanza "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*"
 
 hi def link stanzaAccess StorageClass
 hi def link stanzaType Type
-hi def link stanzaCompositeTypeInner stanzaType
 hi def link stanzaBlockComment Comment
 hi def link stanzaBoolean Boolean
 hi def link stanzaBuiltinType stanzaType
