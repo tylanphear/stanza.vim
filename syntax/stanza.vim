@@ -181,7 +181,7 @@ syn match stanzaDirective "\k\@<!#\K\k*"
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
 syn region stanzaMatch matchgroup=stanzaKeyword start="^\z(\s*\)\<match\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn match stanzaMatchClause "\s*(\zs[^:]*:\s*\K\%(\k\|[<>]\)*\ze\s*)\?:\?" contained containedin=stanzaMatch contains=TOP
+syn match stanzaMatchClause "\s*(\zs\K\k*:\s*\K\%(\k\|[<>]\)*\ze\s*)\?:\?" contained containedin=stanzaMatch contains=TOP
 syn match stanzaMatchClauseType ":\s*\K\%(\k\|[<>]\)*" contained containedin=stanzaMatchClause contains=stanzaCompositeType,stanzaColon,@stanzaComments
 
 syn sync match stanzaSync grouphere stanzaLostanza "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*"
