@@ -73,7 +73,7 @@ syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=N
 syn region stanzaFunctionReturnType matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaCompositeType,@stanzaComments
 syn region stanzaFunctionNestedReturn matchgroup=stanzaOperator start="->" matchgroup=NONE end=",\|)"me=e-1 contained contains=stanzaCompositeType
 
-syn match stanzaCompositeType "\K\k*\%(<.\{-}>\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
+syn match stanzaCompositeType "\K\k*\%(<\%(\k\|[<>]\)\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
 syn match stanzaType "\K\k*" contained
 
 " A pair of angle brackets referring to some inner type
@@ -103,10 +103,6 @@ syn match stanzaCapture "?\K\k*" display
 
 " Stanza symbols can also contain forward slashes
 syn match stanzaSymbol "`\%(\k\|/\)\+" display
-
-syn region stanzaMatch matchgroup=stanzaKeyword start="^\z(\s*\)\<match\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn match stanzaMatchArm "^\s*([^:]*:\s*[^) ]*\s*)\?\ze:\?" contained containedin=stanzaMatch contains=TOP
-syn match stanzaMatchArmType ":\s*[^) ]*\ze\s*)\?" contained containedin=stanzaMatchArm contains=stanzaCompositeType,stanzaColon,@stanzaComments
 
 " All kinds of Stanza numbers with their associated prefixes and suffixes
 
@@ -182,6 +178,11 @@ syn match stanzaReverseAppliedFunction "\K\k*" contained
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
 syn match stanzaDirective "\k\@<!#\K\k*"
+
+" Also has to come after `stanzaFunctionCall` so that `match(...)` works
+syn region stanzaMatch matchgroup=stanzaKeyword start="^\z(\s*\)\<match\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn match stanzaMatchClause "\s*(\zs[^:]*:\s*\K\%(\k\|[<>]\)*\ze\s*)\?:\?" contained containedin=stanzaMatch contains=TOP
+syn match stanzaMatchClauseType ":\s*\K\%(\k\|[<>]\)*" contained containedin=stanzaMatchClause contains=stanzaCompositeType,stanzaColon,@stanzaComments
 
 syn sync match stanzaSync grouphere stanzaLostanza "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*"
 
