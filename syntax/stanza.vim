@@ -59,8 +59,8 @@ syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels con
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
-syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionType skipwhite
-syn region stanzaExternFunctionType matchgroup=stanzaColon start=":" matchgroup=NONE end="$" contained contains=stanzaLostanzaBuiltinType,stanzaQuestionType oneline
+syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionColon skipwhite
+syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup=stanzaCompositeType skipwhite
 
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
@@ -73,7 +73,7 @@ syn region stanzaFunctionReturnType matchgroup=stanzaOperator start="->" end=":\
 syn match stanzaCompositeType "\K\k*\%(<\%(\k\|[<>]\)\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
 syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
 syn region stanzaCompositeType start="(" end=")" contained contains=stanzaCompositeType nextgroup=stanzaOperator skipwhite
-syn match stanzaOperator "->" nextgroup=stanzaCompositeType
+syn match stanzaOperator "->" nextgroup=stanzaCompositeType skipwhite
 
 syn match stanzaType "\K\k*" contained
 
