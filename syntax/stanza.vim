@@ -70,7 +70,7 @@ syn match stanzaCompositeType "\K\k*\%(<\%(\k\|[<>]\)\{-}\)\?" contained contain
 syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
 syn region stanzaCompositeType start="(" end=")" contained contains=stanzaCompositeType nextgroup=stanzaOperator skipwhite
 
-syn match stanzaQualifiedType "\K\k*/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
+syn match stanzaQualifiedType "\%(\K\k*\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
 
 syn match stanzaOperator "->" nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
@@ -252,7 +252,6 @@ hi def link stanzaEscapeError stanzaError
 hi def link stanzaCharacterError stanzaError
 hi def link stanzaFatal PreCondit
 hi def link stanzaTodo Todo
-hi def link stanzaQualifiedType Identifier
 
 " Grab the first line of the file and check for a #use-added-syntax directive
 let s:first_line_of_file = getline(1)
