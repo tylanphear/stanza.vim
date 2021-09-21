@@ -14,7 +14,6 @@ syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
 syn keyword stanzaThis this
-syn keyword stanzaBuiltinType True False Byte Int Long Float Double String Char Void Symbol
 syn keyword stanzaQuestionType ?
 syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 syn keyword stanzaNull null
@@ -44,18 +43,15 @@ syn match stanzaMacroName display contained "\K\k*"
 syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
 syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition
 
+syn match stanzaLostanza "\<lostanza\>"
+
 " LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
 " NOTE: some syntax items are only allowed in `lostanza` definitions and
 " should only be highlighted within them.
-syn region stanzaLostanzaFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zelostanza\s*defn\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall,stanzaAppliedFunction
-
-syn match stanzaLostanza "\<lostanza\>"
-
-" LoStanza types that are invalid outside of `lostanza` or `extern`
-syn keyword stanzaLostanzaBuiltinType byte int long float double ref ptr contained containedin=stanzaLostanzaFunctionDefinition,stanzaExternDecl
+syn region stanzaLostanzaFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+defn\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall,stanzaAppliedFunction
 
 " LoStanza keywords that are invalid outside of `lostanza`
-syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels contained containedin=stanzaLostanzaFunctionDefinition
+syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
@@ -90,7 +86,7 @@ syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
 
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaStructName skipwhite
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaLostanzaStructName skipwhite contained containedin=stanzaLostanzaTypeDefinition
-syn region stanzaLostanzaTypeDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zelostanza\s*deftype\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn region stanzaLostanzaTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
 
 syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
 syn match stanzaKeyword "\<defstruct\>" contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
