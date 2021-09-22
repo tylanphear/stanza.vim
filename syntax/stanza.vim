@@ -20,8 +20,8 @@ syn keyword stanzaNull null
 syn keyword stanzaFatal fatal fatal!
 
 syn keyword stanzaKeyword val var nextgroup=stanzaBindingName skipwhite
-syn match stanzaBindingName "\K\k*" contained nextgroup=stanzaVariableType skipwhite
-syn region stanzaVariableType matchgroup=stanzaColon start=":" matchgroup=stanzaOperator end="=\|$" contains=stanzaQualifiedType,stanzaCompositeType,@stanzaComments
+syn match stanzaBindingName "\K\k*" contained nextgroup=stanzaVariableColon skipwhite
+syn match stanzaVariableColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 syn match stanzaAccess "\<\%(public\|protected\|private\)\>"
 
@@ -43,15 +43,18 @@ syn match stanzaMacroName display contained "\K\k*"
 syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
 syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition
 
-syn match stanzaLostanza "\<lostanza\>"
+syn match stanzaAccess "\<lostanza\>"
 
 " LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
-" NOTE: some syntax items are only allowed in `lostanza` definitions and
-" should only be highlighted within them.
 syn region stanzaLostanzaFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+defn\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall,stanzaAppliedFunction
 
-" LoStanza keywords that are invalid outside of `lostanza`
-syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels
+" LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
+
+" LoStanza-specific types
+syn keyword stanzaLostanzaBuiltinType byte int long float double ref ptr contained containedin=stanzaLostanzaFunctionDefinition,stanzaExternDecl
+
+" LoStanza-specific keywords
+syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels contained containedin=stanzaLostanzaFunctionDefinition
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
@@ -62,22 +65,21 @@ syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup
 syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
 syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite oneline
-syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaFunctionReturnType skipwhite
-syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained containedin=stanzaFunctionParams contains=stanzaCompositeType,stanzaQualifiedType,@stanzaComments
-syn region stanzaFunctionReturnType matchgroup=stanzaOperator start="->" end=":\|$" contained contains=stanzaQualifiedType,stanzaCompositeType,@stanzaComments
+syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaOperator skipwhite skipnl
+syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained containedin=stanzaFunctionParams contains=stanzaQualifiedType,stanzaCompositeType,@stanzaComments
 
-syn match stanzaCompositeType "\K\k*\%(<\%(\k\|[<>]\)\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
-syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr skipwhite
+syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaOperator skipwhite
+syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaCompositeType nextgroup=stanzaAndOr skipwhite
 syn region stanzaCompositeType start="(" end=")" contained contains=stanzaCompositeType nextgroup=stanzaOperator skipwhite
 
 syn match stanzaQualifiedType "\%(\K\k*\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
 
-syn match stanzaOperator "->" nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaOperator "->" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
 syn match stanzaType "\K\k*" contained
 
 " A pair of angle brackets referring to some inner type
-syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType contained
+syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType,stanzaOperator contained
 
 syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
@@ -86,7 +88,7 @@ syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
 
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaStructName skipwhite
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaLostanzaStructName skipwhite contained containedin=stanzaLostanzaTypeDefinition
-syn region stanzaLostanzaTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn region stanzaLostanzaTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
 
 syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
 syn match stanzaKeyword "\<defstruct\>" contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
@@ -181,7 +183,7 @@ syn match stanzaCurriedFunctionCall "\K\k*\ze<.\{-}{" nextgroup=stanzaOf
 
 " Applied function calls (e.g. `foo $ ...`)
 syn match stanzaAppliedFunction "\K\k*\ze\s\+\$\%(\s\|$\)"
-syn match stanzaAppliedFunction "\K\k*\ze<.\{-}\s*\$\%(\s\|$\)" nextgroup=stanzaOf
+syn match stanzaAppliedFunction "\K\k*\ze<.\{-}\s\+\$\%(\s\|$\)" nextgroup=stanzaOf
 
 " Reverse applied function calls (e.g. `... $> func`)
 syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction skipwhite skipnl
@@ -192,9 +194,14 @@ syn match stanzaReverseAppliedFunction "\K\k*" contained
 syn match stanzaDirective "\k\@<!#\K\k*"
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
-syn region stanzaMatch matchgroup=stanzaKeyword start="^\z(\s*\)\<match\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn match stanzaMatchClause "(\s*\K\k*\s*:\s*\%([][<>(),|&/ ]\|\k\)*\s*)\?" contained containedin=stanzaMatch contains=TOP keepend
-syn match stanzaColon ":" contained containedin=stanzaMatchClause nextgroup=stanzaCompositeType,stanzaQualifiedType skipwhite skipnl
+syn region stanzaMatch start="^\z(\s*\).\{-}\ze\<match\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn match stanzaKeyword "\<match\>" contained containedin=stanzaMatch nextgroup=stanzaMatchExpression
+syn match stanzaMatchExpression "(.*)\s*:\?" contained contains=TOP
+syn match stanzaMatchedExpression ".\{-}\ze[:,]" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn region stanzaMatchClause start="(" end=")" contained containedin=stanzaMatch contains=TOP
+syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 syn sync match stanzaSync grouphere stanzaLostanzaFunctionDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*defn\>"
 syn sync match stanzaSync grouphere stanzaLostanzaTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
