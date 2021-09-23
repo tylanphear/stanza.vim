@@ -35,6 +35,24 @@ function! FindStanzaEntity()
     endif
 endfunction!
 
+function! s:JumpToIndent(indent, flags)
+    let pos = searchpos('^'.repeat(' ', a:indent).'\zs\S', a:flags.'W')
+    if pos != [0, 0]
+        call cursor(pos)
+    endif
+endfunction!
+
+function! s:UpIndent()
+    call <SID>JumpToIndent(indent(line('.')) - shiftwidth(), 'b')
+endfunction!
+
+function! s:DownIndent()
+    call <SID>JumpToIndent(indent(line('.')) + shiftwidth(), '')
+endfunction!
+
+nnoremap <Plug>(stanza-up-indent)   :<C-u>call <SID>UpIndent()<CR>
+nnoremap <Plug>(stanza-down-indent) :<C-u>call <SID>DownIndent()<CR>
+
 let b:undo_ftplugin = "
             \setlocal iskeyword< cinkeys< indentkeys< include< define< comments< commentstring< formatoptions<
             \|delfunction! FindStanzaEntity"
