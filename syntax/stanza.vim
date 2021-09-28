@@ -62,7 +62,7 @@ syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunct
 syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup=stanzaCompositeType skipwhite
 
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
-syn keyword stanzaKeyword defn defn* defmulti defmethod nextgroup=stanzaFunctionName skipwhite
+syn keyword stanzaKeyword defn defn* defmulti defmethod defmethod* nextgroup=stanzaFunctionName skipwhite
 syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite oneline
 syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaOperator skipwhite skipnl
@@ -160,11 +160,12 @@ syn match stanzaCharacter "'\%(\\.\|.\)'" contains=stanzaEscape,stanzaEscapeErro
 syn match stanzaCharacterError "''"
 syn match stanzaCharacterError "'\%([^\\][^']\{1,\}\|\\[^']\{2,\}\)'\?"
 
-syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier
+syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier,stanzaFormatSpecifierError
 
 syn region stanzaRawString matchgroup=stanzaQuotes start="\\<\z([^>]*\)>" end="<\z1>" contains=stanzaFormatSpecifier
 
-syn match stanzaFormatSpecifier "%[_*,~@]" contained
+syn match stanzaFormatSpecifier "%[_*,sn~@%]" contained
+syn match stanzaFormatSpecifierError "%[^_*,sn~@%]" contained
 syn match stanzaContinuation "\\\ze\n\s*" contained
 syn match stanzaEscape +\\[bnrt'"\\]+ contained
 syn match stanzaEscapeError "\\[^bnrt'"\\]" contained
@@ -256,16 +257,18 @@ hi def link stanzaError Error
 hi def link stanzaTabError stanzaError
 hi def link stanzaNumberError stanzaError
 hi def link stanzaEscapeError stanzaError
+hi def link stanzaFormatSpecifierError stanzaError
 hi def link stanzaCharacterError stanzaError
 hi def link stanzaFatal PreCondit
 hi def link stanzaTodo Todo
 
 " Grab the first line of the file and check for a #use-added-syntax directive
 let s:first_line_of_file = getline(1)
-let s:syntax_matches = matchlist(s:first_line_of_file, "#use-added-syntax(\\(.\\{-}\\))")
-let s:added_syntax = get(s:syntax_matches, 1, "")
+let s:syntax_matches = matchlist(s:first_line_of_file, '#use-added-syntax(\(.\{-}\))')
+let b:stanza_added_syntax_modules =
+            \ map(split(get(s:syntax_matches, 1, ""), ','), {_, module -> trim(module)})
 
-if s:added_syntax != ""
+for module in b:stanza_added_syntax_modules
     " Restrict runtimepath so we only load Stanza syntax modules
     let s:saved_runtimepath = &runtimepath
     let s:this_runtimepath = expand('<sfile>:p:h')
@@ -273,9 +276,9 @@ if s:added_syntax != ""
         let s:this_runtimepath .= ','.g:stanza_syntax_modules
     endif
     exec 'set runtimepath='.s:this_runtimepath
-    exec 'runtime! '.s:added_syntax.'.vim'
+    exec 'runtime! '.module.'.vim'
     exec 'set runtimepath='.s:saved_runtimepath
-endif
+endfor
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
