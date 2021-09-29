@@ -36,7 +36,7 @@ function! FindStanzaEntity()
 endfunction!
 
 function! s:JumpToIndent(indent, flags)
-    let pos = searchpos('^'.repeat(' ', a:indent).'\zs\S', a:flags.'W')
+    let pos = searchpos('^'.repeat(' ', a:indent).'\zs\S', a:flags.'nW')
     if pos != [0, 0]
         call cursor(pos)
     endif
@@ -55,7 +55,9 @@ nnoremap <Plug>(stanza-down-indent) :<C-u>call <SID>DownIndent()<CR>
 
 let b:undo_ftplugin = "
             \setlocal iskeyword< cinkeys< indentkeys< include< define< comments< commentstring< formatoptions<
-            \|delfunction! FindStanzaEntity"
+            \|delfunction! FindStanzaEntity
+            \|nunmap <Plug>(stanza-up-indent)
+            \|nunmap <Plug>(stanza-down-indent)"
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
