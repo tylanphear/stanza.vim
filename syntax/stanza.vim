@@ -48,16 +48,11 @@ syn match stanzaAccess "\<lostanza\>"
 " LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
 syn region stanzaLostanzaFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+defn\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall,stanzaAppliedFunction
 
-" LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
-
-" LoStanza-specific types
-syn keyword stanzaLostanzaBuiltinType byte int long float double ref ptr contained containedin=stanzaLostanzaFunctionDefinition,stanzaExternDecl
-
 " LoStanza-specific keywords
-syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels contained containedin=stanzaLostanzaFunctionDefinition
+syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
-syn keyword stanzaExtern extern nextgroup=stanzaExternFunctionName skipwhite
+syn keyword stanzaExtern extern nextgroup=stanzaKeyword,stanzaExternFunctionName skipwhite
 syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionColon skipwhite
 syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup=stanzaCompositeType skipwhite
 
@@ -66,11 +61,11 @@ syn keyword stanzaKeyword defn defn* defmulti defmethod defmethod* nextgroup=sta
 syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite oneline
 syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaOperator skipwhite skipnl
-syn region stanzaFunctionParamType matchgroup=stanzaColon start=":" matchgroup=NONE end=",\|)\|$"me=e-1 contained containedin=stanzaFunctionParams contains=stanzaQualifiedType,stanzaCompositeType,@stanzaComments
+syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
-syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaOperator skipwhite
-syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaCompositeType nextgroup=stanzaAndOr skipwhite
-syn region stanzaCompositeType start="(" end=")" contained contains=stanzaCompositeType nextgroup=stanzaOperator skipwhite
+syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaOperator skipwhite skipnl
+syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaCompositeType nextgroup=stanzaAndOr skipwhite skipnl
+syn region stanzaCompositeType start="(" end=")" contained contains=stanzaCompositeType nextgroup=stanzaOperator skipwhite skipnl
 
 syn match stanzaQualifiedType "\%(\K\k*\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
 
@@ -81,7 +76,7 @@ syn match stanzaType "\K\k*" contained
 " A pair of angle brackets referring to some inner type
 syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType,stanzaOperator contained
 
-syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
 " Enum definition (e.g. `defenum Foo`)
 syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
