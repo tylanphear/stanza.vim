@@ -8,7 +8,7 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-syn keyword stanzaKeyword let let-var where within label switch to through by not and or fn fn* yield break attempt
+syn keyword stanzaKeyword let let-var where within label switch to through by not and or fn fn* yield break attempt with
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
@@ -94,17 +94,13 @@ syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompo
 syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
 
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaStructName skipwhite
-syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaLostanzaStructName skipwhite contained containedin=stanzaLostanzaTypeDefinition
 syn region stanzaLostanzaTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
-
-syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP nextgroup=stanzaKeyword skipwhite skipnl
-syn match stanzaKeyword "\<defstruct\>" contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
-syn match stanzaStructFieldName "^\s*\zs\K\k*\ze\s*:" contained containedin=stanzaStructDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
-syn match stanzaStructFieldColon ":" contained containedin=stanzaStructField contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
-syn match stanzaKeyword "with\s*:" contained containedin=stanzaStructDefinition,stanzaPackageDefinition
+syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn keyword stanzaKeyword defstruct contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
+syn match stanzaStructFieldName "\K\k*\ze\s*:" contained containedin=stanzaStructDefinition,stanzaLostanzaTypeDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
+syn match stanzaStructFieldColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 syn match stanzaStructName "\K\k*" display contained nextgroup=stanzaOf
-syn match stanzaLostanzaStructName "\K\k*" display contained
 
 " This has to come *after* the matches for `<` and `:` so it takes priority
 syn match stanzaTypeAnnotation "<:" nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
