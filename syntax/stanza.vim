@@ -8,7 +8,7 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-syn keyword stanzaKeyword let let-var where within label switch to through by not and or fn fn* yield break attempt with
+syn keyword stanzaKeyword let let-var where within switch to through by not and or fn fn* yield break attempt with
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
@@ -24,6 +24,9 @@ syn match stanzaKeyword "\<do\>(\@!"
 
 " generate<...> where ... is some arbitrary type
 syn keyword stanzaKeyword generate nextgroup=stanzaOf
+
+" label<...> where ... is some arbitrary type
+syn keyword stanzaKeyword label nextgroup=stanzaOf
 
 syn keyword stanzaException try finally throw
 syn keyword stanzaException catch nextgroup=stanzaCatchClause skipwhite
