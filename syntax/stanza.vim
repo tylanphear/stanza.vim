@@ -206,8 +206,8 @@ syn match stanzaKeyword "\<match\>" contained containedin=stanzaMatch nextgroup=
 syn match stanzaMatchExpression "(.*)\s*:\?" contained contains=TOP
 syn match stanzaMatchedExpression ".\{-}\ze[:,]" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
-syn region stanzaMatchClause start="(" end=")" contained containedin=stanzaMatch contains=TOP
-syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn region stanzaMatchClause start="(" end=")" contained containedin=stanzaMatch contains=TOP keepend
+syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 syn sync match stanzaSync grouphere stanzaLostanzaFunctionDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*defn\>"
