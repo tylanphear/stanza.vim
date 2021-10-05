@@ -201,12 +201,11 @@ syn match stanzaReverseAppliedFunction "\K\k*" contained
 syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-syntax\)\>"
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
-syn region stanzaMatch start="^\z(\s*\).\{-}\ze\<match\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn match stanzaKeyword "\<match\>" contained containedin=stanzaMatch nextgroup=stanzaMatchExpression
+syn match stanzaKeyword "\<match\>" nextgroup=stanzaMatchExpression
 syn match stanzaMatchExpression "(.*)\s*:\?" contained contains=TOP
-syn match stanzaMatchedExpression ".\{-}\ze[:,]" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn match stanzaMatchedExpression "[^:]\+\ze[:)]" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn region stanzaMatchClause start="^\s*(" end=")" contains=TOP keepend
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
-syn region stanzaMatchClause start="(" end=")" contained containedin=stanzaMatch contains=TOP keepend
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
