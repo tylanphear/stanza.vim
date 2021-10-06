@@ -22,10 +22,11 @@ endif
 
 function! GetStanzaIndent(lnum)
 
-  " If the start of the line is in a string don't change the indent.
   if has('syntax_items')
-	\ && synIDattr(synID(a:lnum, 1, 1), "name") =~ "String$"
-    return -1
+    " If we're in a string or a comment, don't change the indent
+    if synIDattr(synID(line('.'), col('.'), 1), "name") =~ 'String\|Comment$'
+      return -1
+    endif
   endif
 
   " Search backwards for the previous non-empty line.
