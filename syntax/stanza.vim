@@ -8,7 +8,7 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-syn keyword stanzaKeyword let let-var where within switch to through by not and or fn fn* yield break attempt with
+syn keyword stanzaKeyword let let-var where within switch to through by not and or yield break attempt with
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
@@ -193,8 +193,10 @@ syn match stanzaAppliedFunction "\K\k*\ze\s\+\$\%(\s\|$\)"
 syn match stanzaAppliedFunction "\K\k*\ze<.\{-}\s\+\$\%(\s\|$\)" nextgroup=stanzaOf
 
 " Reverse applied function calls (e.g. `... $> func`)
-syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction skipwhite skipnl
+syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction,stanzaKeyword skipwhite skipnl
 syn match stanzaReverseAppliedFunction "\K\k*" contained
+
+syn keyword stanzaKeyword fn fn* nextgroup=stanzaFunctionParams skipwhite
 
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
@@ -202,7 +204,7 @@ syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-synta
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
 syn match stanzaKeyword "\<match\>" nextgroup=stanzaMatchExpression
-syn match stanzaMatchExpression "(.*)\s*:\?" contained contains=TOP
+syn match stanzaMatchExpression "(.*)\s*:" contained contains=TOP
 syn match stanzaMatchedExpression "[^:]\+\ze[:)]" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn region stanzaMatchClause start="^\s*(" end=")" contains=TOP keepend
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
