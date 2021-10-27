@@ -51,8 +51,12 @@ syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\
 " Operators that *can't* appear in Stanza identifiers
 syn match stanzaOperator "\%(|\|&\|<\|<=\|>\|>=\|=>\)"
 
-syn keyword stanzaKeyword defsyntax defrule defproduction fail-if nextgroup=stanzaMacroName skipwhite
+syn keyword stanzaKeyword defsyntax defrule fail-if nextgroup=stanzaMacroName skipwhite
 syn match stanzaMacroName display contained "\K\k*"
+
+syn keyword stanzaKeyword defproduction nextgroup=stanzaProductionName skipwhite
+syn match stanzaProductionName display contained "\K\k*" nextgroup=stanzaProductionColon skipwhite
+syn match stanzaProductionColon ":" contained contains=stanzaColon skipwhite skipnl nextgroup=stanzaQualifiedType,stanzaCompositeType
 
 " Package definition (e.g. `defpackage Foo:\n import Bar`)
 syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
@@ -68,8 +72,8 @@ syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaKeyword,stanzaExternFunctionName skipwhite
-syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionColon skipwhite
-syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup=stanzaCompositeType skipwhite
+syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionColon skipwhite skipnl
+syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup=stanzaCompositeType skipwhite skipnl
 
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod defmethod* nextgroup=stanzaFunctionName skipwhite
@@ -166,12 +170,11 @@ syn match stanzaCharacter "'\%(\\.\|.\)'" contains=stanzaEscape,stanzaEscapeErro
 syn match stanzaCharacterError "''"
 syn match stanzaCharacterError "'\%([^\\][^']\{1,\}\|\\[^']\{2,\}\)'\?"
 
-syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier,stanzaFormatSpecifierError
+syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier
 
 syn region stanzaRawString matchgroup=stanzaQuotes start="\\<\z([^>]*\)>" end="<\z1>" contains=stanzaFormatSpecifier
 
 syn match stanzaFormatSpecifier "%[_*,sn~@%]" contained
-syn match stanzaFormatSpecifierError "%[^_*,sn~@%]" contained
 syn match stanzaContinuation "\\\ze\n\s*" contained
 syn match stanzaEscape +\\[bnrt'"\\]+ contained
 syn match stanzaEscapeError "\\[^bnrt'"\\]" contained
@@ -194,8 +197,7 @@ syn match stanzaAppliedFunction "\K\k*\ze<.\{-}\s\+\$\%(\s\|$\)" nextgroup=stanz
 
 " Reverse applied function calls (e.g. `... $> func`)
 syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction,stanzaKeyword skipwhite skipnl
-syn match stanzaReverseAppliedFunction "\K\k*" contained
-
+syn match stanzaReverseAppliedFunction "\K\k*" contained nextgroup=stanzaOf skipwhite skipnl
 syn keyword stanzaKeyword fn fn* nextgroup=stanzaFunctionParams skipwhite
 
 " Has to come after `stanzaFunctionCall`, since there are some directives
@@ -204,8 +206,15 @@ syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-synta
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
 syn match stanzaKeyword "\<match\>" nextgroup=stanzaMatchExpression
-syn match stanzaMatchExpression "(.*)\s*:" contained contains=TOP
-syn match stanzaMatchedExpression "[^:]\+\ze[:)]" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
+syn region stanzaMatchExpression start="(" end=")" contained contains=TOP oneline
+
+" Awful hack to allow `match(func():Foo):`. We know that the matched
+" expression can be any arbitrary expression, and may include parentheses. At
+" the same time, we want to avoid accidentally matching the closing `)` of the
+" `match(...)`. Hence, the special care to disallow `)` as the first character
+" of the match (which isn't syntactically correct anyhow).
+syn match stanzaMatchedExpression "[^:)][^:]\{-}\ze:" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
+
 syn region stanzaMatchClause start="^\s*(" end=")" contains=TOP keepend
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
