@@ -8,7 +8,7 @@ if exists("b:current_syntax") | finish | endif
 let s:saved_cpo = &cpo
 set cpo&vim
 
-syn keyword stanzaKeyword let let-var where within switch to through by not and or yield break attempt with
+syn keyword stanzaKeyword let-var where within switch to through by not and or yield break attempt with
 syn keyword stanzaConditional if else when
 syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
@@ -17,6 +17,10 @@ syn keyword stanzaQuestionType ?
 syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 syn keyword stanzaNull null
 syn keyword stanzaFatal fatal fatal!
+
+" `let` binding with optional function params (e.g. `let foo (i = 0):`)
+syn keyword stanzaKeyword let nextgroup=stanzaLetBinding skipwhite skipnl
+syn match stanzaLetBinding "\K\k*" contained nextgroup=stanzaFunctionParams skipwhite
 
 " Only match do when not of the form `do(`, which should be highlighted as a
 " function call
