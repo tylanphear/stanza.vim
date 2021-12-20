@@ -287,7 +287,8 @@ hi def link stanzaTodo Todo
 let s:first_line_of_file = getline(1)
 let s:syntax_matches = matchlist(s:first_line_of_file, '#use-added-syntax(\(.\{-}\))')
 let b:stanza_added_syntax_modules =
-            \ map(split(get(s:syntax_matches, 1, ""), ','), {_, module -> trim(module).'.vim'})
+            \ map(split(get(s:syntax_matches, 1, ""), ','),
+            \     {_, module -> trim(module).'.vim'})
 
 if len(b:stanza_added_syntax_modules) > 0
     " Restrict runtimepath so we only load Stanza syntax modules
