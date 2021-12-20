@@ -90,7 +90,8 @@ syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType
 syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr skipwhite skipnl
 syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaOperator skipwhite skipnl
 
-syn match stanzaQualifiedType "\%(\K\k*\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
+" use `\k\+` here because package names can start with a number
+syn match stanzaQualifiedType "\%(\k\+\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
 
 syn match stanzaOperator "->" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
