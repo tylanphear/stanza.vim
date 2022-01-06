@@ -63,7 +63,7 @@ syn match stanzaProductionName display contained "\K\k*" nextgroup=stanzaProduct
 syn match stanzaProductionColon ":" contained contains=stanzaColon skipwhite skipnl nextgroup=stanzaQualifiedType,stanzaCompositeType
 
 " Package definition (e.g. `defpackage Foo:\n import Bar`)
-syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\|;\)" end="^" contains=TOP
 syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition
 
 syn match stanzaAccess "\<lostanza\>"
