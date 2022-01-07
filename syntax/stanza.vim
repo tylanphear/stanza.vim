@@ -186,7 +186,8 @@ syn match stanzaEscapeError "\\[^bnrt'"\\]" contained
 
 syn region stanzaAnonymousFn start="{" end="}" contains=TOP
 
-syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAnonymousFn
+syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAnonymousFn nextgroup=stanzaAnonymousParameterColon skipwhite
+syn match stanzaAnonymousParameterColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 " Function calls (e.g. `foo(...)`)
 syn match stanzaFunctionCall "\K\k*\ze("
