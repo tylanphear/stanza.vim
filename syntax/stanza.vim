@@ -86,9 +86,9 @@ syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" 
 syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaArrow skipwhite skipnl
 syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
-syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow skipwhite skipnl
-syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr skipwhite skipnl
-syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite skipnl
+syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow skipwhite
+syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr skipwhite
+syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
 
 " use `\k\+` here because package names can start with a number
 syn match stanzaQualifiedType "\%(\k\+\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
