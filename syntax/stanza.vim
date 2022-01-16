@@ -66,14 +66,6 @@ syn match stanzaProductionColon ":" contained contains=stanzaColon skipwhite ski
 syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\|;\)" end="^" contains=TOP
 syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition
 
-syn match stanzaAccess "\<lostanza\>"
-
-" LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
-syn region stanzaLostanzaFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+defn\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP,stanzaAnonymousFn,stanzaCurriedFunctionCall,stanzaAppliedFunction
-
-" LoStanza-specific keywords
-syn keyword stanzaLostanzaKeyword return call-c call-prim goto sizeof labels
-
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaKeyword,stanzaExternFunctionName skipwhite
 syn match stanzaExternFunctionName "\K\k*" contained nextgroup=stanzaExternFunctionColon skipwhite skipnl
@@ -87,7 +79,7 @@ syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgro
 syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
 syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow skipwhite
-syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr skipwhite
+syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
 syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
 
 " use `\k\+` here because package names can start with a number
@@ -100,16 +92,19 @@ syn match stanzaType "\K\k*" contained
 " A pair of angle brackets referring to some inner type
 syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType,stanzaArrow contained
 
+" Type constructors (union or sum types)
 syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
 " Enum definition (e.g. `defenum Foo`)
 syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
 
+" Type definition
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaStructName skipwhite
-syn region stanzaLostanzaTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" contains=TOP
+
+" Struct definition
 syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
 syn keyword stanzaKeyword defstruct contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
-syn match stanzaStructFieldName "\K\k*\ze\s*:" contained containedin=stanzaStructDefinition,stanzaLostanzaTypeDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
+syn match stanzaStructFieldName "\K\k*\ze\s*:" contained containedin=stanzaStructDefinition,stanzaLSTypeDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
 syn match stanzaStructFieldColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 syn match stanzaStructName "\K\k*" display contained nextgroup=stanzaOf
@@ -117,8 +112,10 @@ syn match stanzaStructName "\K\k*" display contained nextgroup=stanzaOf
 " This has to come *after* the matches for `<` and `:` so it takes priority
 syn match stanzaTypeAnnotation "<:" nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
+" TODOs and such
 syn keyword stanzaTodo TODO FIXME NOTE
 
+" Line comments
 syn region stanzaComment start=";" end="$" contains=stanzaTodo,@Spell oneline
 
 " A block comment is started with ;<TAG> and then ended by <TAG>
@@ -175,16 +172,18 @@ syn match stanzaCharacter "'\%(\\.\|.\)'" contains=stanzaEscape,stanzaEscapeErro
 syn match stanzaCharacterError "''"
 syn match stanzaCharacterError "'\%([^\\][^']\{1,\}\|\\[^']\{2,\}\)'\?"
 
+" Strings and raw strings
 syn region stanzaString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation,stanzaFormatSpecifier
-
 syn region stanzaRawString matchgroup=stanzaQuotes start="\\<\z([^>]*\)>" end="<\z1>" contains=stanzaFormatSpecifier
 
+" Format specifiers, continuations, escapes and errors
 syn match stanzaFormatSpecifier "%[_*,sn~@%]" contained
 syn match stanzaContinuation "\\\ze\n\s*" contained
 syn match stanzaEscape +\\[bnrt'"\\]+ contained
 syn match stanzaEscapeError "\\[^bnrt'"\\]" contained
 
-syn region stanzaAnonymousFn start="{" end="}" contains=TOP
+" Anonymous functions
+syn region stanzaAnonymousFn matchgroup=stanzaCurlyBracket start="{" end="}" contains=TOP
 
 syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAnonymousFn nextgroup=stanzaAnonymousParameterColon skipwhite
 syn match stanzaAnonymousParameterColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
@@ -226,18 +225,49 @@ syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
-syn sync match stanzaSync grouphere stanzaLostanzaFunctionDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*defn\>"
-syn sync match stanzaSync grouphere stanzaLostanzaTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
+" LoStanza stuff
+syn match stanzaAccess "\<lostanza\>"
+
+" Type construction without `new` (e.g. `lostanza val foo: Foo = Foo{}`)
+syn match stanzaLSTypeConstructor "\K\k*\ze{" contained nextgroup=stanzaLSCurlyBrackets
+    \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
+syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+
+" LoStanza Strings and raw strings
+syn region stanzaLSString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation contained
+    \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
+syn region stanzaLSRawString matchgroup=stanzaQuotes start="\\<\z([^>]*\)>" end="<\z1>" contained
+    \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
+
+" Variable Definition
+syn region stanzaLSVariableDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+\%(val\|var\)\>" matchgroup=NONE skip="^\(\z1\s\)" end="^"
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction
+
+" LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
+syn region stanzaLSFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+\%(defn\|defn\*\|defmethod\|defmethod\*\)\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^"
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+
+" LoStanza-specific keywords
+syn keyword stanzaLSKeyword return call-c call-prim goto sizeof tagof labels contained
+    \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
+
+syn region stanzaLSLabels matchgroup=stanzaLSKeyword start="^\z(\s*\)labels" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^"
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+syn match stanzaLSLabel "^\s*\zs\K\k*\ze.*:" nextgroup=stanzaFunctionParams skipwhite contained containedin=stanzaLSLabels
+
+syn region stanzaLSTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^"
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+
+syn sync match stanzaSync grouphere stanzaLSFunctionDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*\%(defn\|defn\*\|defmethod\|defmethod\*\)\>"
+syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
 syn sync match stanzaSync grouphere stanzaPackageDefinition "^\s*defpackage\>"
 
 hi def link stanzaAccess StorageClass
-hi def link stanzaLostanza StorageClass
 hi def link stanzaType Type
 hi def link stanzaBlockComment Comment
 hi def link stanzaBoolean Boolean
 hi def link stanzaBuiltinType stanzaType
 hi def link stanzaQuestionType stanzaType
-hi def link stanzaLostanzaBuiltinType stanzaType
 hi def link stanzaCapture Special
 hi def link stanzaCharacter Character
 hi def link stanzaComment Comment
@@ -267,15 +297,14 @@ hi def link stanzaQuotes stanzaString
 hi def link stanzaRawString stanzaString
 hi def link stanzaRepeat Repeat
 hi def link stanzaStructName Structure
-hi def link stanzaLostanzaStructName stanzaStructName
 hi def link stanzaSymbol Macro
 hi def link stanzaTypeAnnotation Operator
 hi def link stanzaTypeOperator Operator
 hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
+hi def link stanzaCurlyBracket stanzaKeyword
 hi def link stanzaAnonymousParameter Macro
 hi def link stanzaNull Constant
-hi def link stanzaLostanzaKeyword stanzaKeyword
 hi def link stanzaError Error
 hi def link stanzaTabError stanzaError
 hi def link stanzaNumberError stanzaError
@@ -284,6 +313,13 @@ hi def link stanzaFormatSpecifierError stanzaError
 hi def link stanzaCharacterError stanzaError
 hi def link stanzaFatal PreCondit
 hi def link stanzaTodo Todo
+hi def link stanzaLSKeyword stanzaKeyword
+hi def link stanzaLSBuiltinType stanzaType
+hi def link stanzaLSTypeConstructor stanzaType
+hi def link stanzaLSStructName stanzaStructName
+hi def link stanzaLSLabel stanzaFunctionName
+hi def link stanzaLSString stanzaString
+hi def link stanzaLSRawString stanzaRawString
 
 " Grab the first line of the file and check for a #use-added-syntax directive
 let s:first_line_of_file = getline(1)
