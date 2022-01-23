@@ -22,9 +22,8 @@ syn keyword stanzaFatal fatal fatal!
 syn keyword stanzaKeyword let nextgroup=stanzaLetBinding skipwhite skipnl
 syn match stanzaLetBinding "\K\k*" contained nextgroup=stanzaFunctionParams skipwhite
 
-" Only match do when not of the form `do(`, which should be highlighted as a
-" function call
-syn match stanzaKeyword "\<do\>(\@!"
+" The operating function in a `for` expression (e.g. `do` in `for i in is do: ...`)
+syn match stanzaOperatingFunction /\%(\<for\>.\+\)\@<=\<\K\k*\>\ze\s*:/
 
 " generate<...> where ... is some arbitrary type
 syn keyword stanzaKeyword generate nextgroup=stanzaOf
@@ -231,7 +230,7 @@ syn match stanzaAccess "\<lostanza\>"
 " Type construction without `new` (e.g. `lostanza val foo: Foo = Foo{}`)
 syn match stanzaLSTypeConstructor "\K\k*\ze{" contained nextgroup=stanzaLSCurlyBrackets
     \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
-syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction
 
 " LoStanza Strings and raw strings
 syn region stanzaLSString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation contained
@@ -241,22 +240,22 @@ syn region stanzaLSRawString matchgroup=stanzaQuotes start="\\<\z([^>]*\)>" end=
 
 " Variable Definition
 syn region stanzaLSVariableDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+\%(val\|var\)\>" matchgroup=NONE skip="^\(\z1\s\)" end="^"
-    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaOperatingFunction
 
 " LoStanza definition (e.g. `lostanza defn String (s: ptr<byte>) -> ref<String>`)
-syn region stanzaLSFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+\%(defn\|defn\*\|defmethod\|defmethod\*\)\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^"
-    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+syn region stanzaLSFunctionDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+\%(defn\|defn\*\|defmethod\|defmethod\*\)\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^" keepend
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction
 
 " LoStanza-specific keywords
 syn keyword stanzaLSKeyword return call-c call-prim goto sizeof tagof labels contained
     \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
 
 syn region stanzaLSLabels matchgroup=stanzaLSKeyword start="^\z(\s*\)labels" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^"
-    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction
 syn match stanzaLSLabel "^\s*\zs\K\k*\ze.*:" nextgroup=stanzaFunctionParams skipwhite contained containedin=stanzaLSLabels
 
 syn region stanzaLSTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?lostanza\ze\s\+deftype\>" matchgroup=NONE skip="^\(\z1\s\|$\)" end="^"
-    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn
+    \ contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction
 
 syn sync match stanzaSync grouphere stanzaLSFunctionDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*\%(defn\|defn\*\|defmethod\|defmethod\*\)\>"
 syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
@@ -304,6 +303,7 @@ hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
 hi def link stanzaCurlyBracket stanzaKeyword
 hi def link stanzaAnonymousParameter Macro
+hi def link stanzaOperatingFunction stanzaKeyword
 hi def link stanzaNull Constant
 hi def link stanzaError Error
 hi def link stanzaTabError stanzaError
