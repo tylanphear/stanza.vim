@@ -126,8 +126,9 @@ syn cluster stanzaComments contains=stanzaComment,stanzaBlockComment
 " groups (e.g. `?tag:id`)
 syn match stanzaCapture "?\K\k*" display
 
-" Stanza symbols can also contain forward slashes
-syn match stanzaSymbol "`\%(\k\|/\)\+" display
+" Stanza symbols can contain anything but whitespace or parentheses (of any kind)
+syn match stanzaSymbol "`[^][{}() ]\+" display
+syn region stanzaQuoteParens matchgroup=stanzaQuoteParen start="`(" end=")" contains=TOP
 
 " All kinds of Stanza numbers with their associated prefixes and suffixes
 
@@ -204,6 +205,10 @@ syn match stanzaOperator "\$>" nextgroup=stanzaReverseAppliedFunction,stanzaKeyw
 syn match stanzaReverseAppliedFunction "\K\k*" contained nextgroup=stanzaOf skipwhite skipnl
 syn keyword stanzaKeyword fn fn* nextgroup=stanzaFunctionParams skipwhite
 
+" Has to come after `stanzaFunctionCall`, since it otherwise would be
+" highlighted as a function call.
+syn match stanzaConditionalAccess "\<\%(public-when\|protected-when\|private-when\)\>"
+
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
 syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-syntax\)\>"
@@ -230,7 +235,7 @@ syn match stanzaAccess "\<lostanza\>"
 " Type construction without `new` (e.g. `lostanza val foo: Foo = Foo{}`)
 syn match stanzaLSTypeConstructor "\K\k*\ze{" contained nextgroup=stanzaLSCurlyBrackets
     \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
-syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction
+syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contained contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSLabels
 
 " LoStanza Strings and raw strings
 syn region stanzaLSString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation contained
@@ -262,6 +267,7 @@ syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|pr
 syn sync match stanzaSync grouphere stanzaPackageDefinition "^\s*defpackage\>"
 
 hi def link stanzaAccess StorageClass
+hi def link stanzaConditionalAccess stanzaAccess
 hi def link stanzaType Type
 hi def link stanzaBlockComment Comment
 hi def link stanzaBoolean Boolean
@@ -297,11 +303,12 @@ hi def link stanzaRawString stanzaString
 hi def link stanzaRepeat Repeat
 hi def link stanzaStructName Structure
 hi def link stanzaSymbol Macro
+hi def link stanzaQuoteParen stanzaSymbol
 hi def link stanzaTypeAnnotation Operator
 hi def link stanzaTypeOperator Operator
 hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
-hi def link stanzaCurlyBracket stanzaKeyword
+hi def link stanzaCurlyBracket Delimiter
 hi def link stanzaAnonymousParameter Macro
 hi def link stanzaOperatingFunction stanzaKeyword
 hi def link stanzaNull Constant
