@@ -214,17 +214,9 @@ syn match stanzaConditionalAccess "\<\%(public-when\|protected-when\|private-whe
 syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-syntax\)\>"
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
-syn match stanzaKeyword "\<match\>" nextgroup=stanzaMatchExpression
-syn region stanzaMatchExpression start="(" end=")" contained contains=TOP oneline
+syn region stanzaMatch matchgroup=stanzaKeyword start="\z(\s*\)\%(.*\)\zs\<match\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn region stanzaMatchClause start="\s\+\zs(" end=")" contained contains=TOP oneline keepend containedin=stanzaMatch
 
-" Awful hack to allow `match(func():Foo):`. We know that the matched
-" expression can be any arbitrary expression, and may include parentheses. At
-" the same time, we want to avoid accidentally matching the closing `)` of the
-" `match(...)`. Hence, the special care to disallow `)` as the first character
-" of the match (which isn't syntactically correct anyhow).
-syn match stanzaMatchedExpression "[^:)][^:]\{-}\ze:" contained containedin=stanzaMatchExpression contains=TOP nextgroup=stanzaMatchColon skipwhite
-
-syn region stanzaMatchClause start="^\s*(" end=")" contains=TOP keepend
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
@@ -235,7 +227,8 @@ syn match stanzaAccess "\<lostanza\>"
 " Type construction without `new` (e.g. `lostanza val foo: Foo = Foo{}`)
 syn match stanzaLSTypeConstructor "\K\k*\ze{" contained nextgroup=stanzaLSCurlyBrackets
     \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSCurlyBrackets,stanzaLSLabels
-syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contained contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSLabels
+syn region stanzaLSCurlyBrackets matchgroup=stanzaCurlyBracket start="{" end="}" contained contains=TOP,stanzaCurriedFunctionCall,stanzaAppliedFunction,stanzaAnonymousFn,stanzaOperatingFunction
+    \ containedin=stanzaLSVariableDefinition,stanzaLSFunctionDefinition,stanzaLSLabels
 
 " LoStanza Strings and raw strings
 syn region stanzaLSString matchgroup=stanzaQuotes start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=stanzaEscape,stanzaEscapeError,stanzaContinuation contained
