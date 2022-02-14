@@ -128,7 +128,6 @@ syn match stanzaCapture "?\K\k*" display
 
 " Stanza symbols can contain anything but whitespace or parentheses (of any kind)
 syn match stanzaSymbol "`[^][{}() ]\+" display
-syn region stanzaQuoteParens matchgroup=stanzaQuoteParen start="`(" end=")" contains=TOP
 
 " All kinds of Stanza numbers with their associated prefixes and suffixes
 
@@ -296,12 +295,11 @@ hi def link stanzaRawString stanzaString
 hi def link stanzaRepeat Repeat
 hi def link stanzaStructName Structure
 hi def link stanzaSymbol Macro
-hi def link stanzaQuoteParen stanzaSymbol
 hi def link stanzaTypeAnnotation Operator
 hi def link stanzaTypeOperator Operator
 hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
-hi def link stanzaCurlyBracket Delimiter
+hi def link stanzaCurlyBracket stanzaKeyword
 hi def link stanzaAnonymousParameter Macro
 hi def link stanzaOperatingFunction stanzaKeyword
 hi def link stanzaNull Constant
