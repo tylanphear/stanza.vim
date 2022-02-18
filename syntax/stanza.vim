@@ -29,7 +29,9 @@ syn match stanzaOperatingFunction /\%(\<for\>.\+\)\@<=\<\K\k*\>\ze\s*:/
 syn keyword stanzaKeyword generate nextgroup=stanzaOf
 
 " label<...> where ... is some arbitrary type
-syn keyword stanzaKeyword label nextgroup=stanzaOf
+syn keyword stanzaKeyword label nextgroup=stanzaLabelType
+syn region stanzaLabelType matchgroup=stanzaAngleBrackets start="<" end=">" contains=stanzaQualifiedType,stanzaCompositeType,stanzaArrow contained nextgroup=stanzaLabelBinding skipwhite oneline
+syn match stanzaLabelBinding "\K\k*" contained display
 
 syn keyword stanzaException try finally throw
 syn keyword stanzaException catch nextgroup=stanzaCatchClause skipwhite
@@ -258,6 +260,8 @@ syn sync match stanzaSync grouphere stanzaLSFunctionDefinition "^\s*\%(\%(public
 syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
 syn sync match stanzaSync grouphere stanzaPackageDefinition "^\s*defpackage\>"
 
+syn sync match stanzaSync grouphere stanzaFunctionParams "^\s*\%(\%(public\|protected\|private\)\s\+\)\%(defn\|defmethod\)\s*\%(\K\k\)*\%(<.*>\)\?\s*"
+
 hi def link stanzaAccess StorageClass
 hi def link stanzaConditionalAccess stanzaAccess
 hi def link stanzaType Type
@@ -301,7 +305,9 @@ hi def link stanzaAndOr stanzaTypeOperator
 hi def link stanzaThis Constant
 hi def link stanzaCurlyBracket stanzaKeyword
 hi def link stanzaAnonymousParameter Macro
-hi def link stanzaOperatingFunction stanzaKeyword
+hi def link stanzaOperatingFunction stanzaFunctionCall
+hi def link stanzaLabelBinding stanzaFunctionName
+hi def link stanzaLetBinding stanzaFunctionName
 hi def link stanzaNull Constant
 hi def link stanzaError Error
 hi def link stanzaTabError stanzaError
