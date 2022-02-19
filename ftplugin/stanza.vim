@@ -19,6 +19,8 @@ setlocal define=^\\s*\\(public\\\|protected\\\|private\\)\\?\\s*\\(defn\\\|defme
 setlocal comments=:;
 setlocal commentstring=;\ %s
 
+setlocal matchpairs+=<:>
+
 setlocal formatoptions-=t formatoptions+=croqnl
 
 function! FindStanzaEntity()
@@ -54,7 +56,7 @@ nnoremap <Plug>(stanza-up-indent)   :<C-u>call <SID>UpIndent()<CR>
 nnoremap <Plug>(stanza-down-indent) :<C-u>call <SID>DownIndent()<CR>
 
 let b:undo_ftplugin = "
-            \setlocal iskeyword< cinkeys< indentkeys< include< define< comments< commentstring< formatoptions<
+            \setlocal iskeyword< cinkeys< indentkeys< include< define< suffixesadd< comments< commentstring< matchpairs< formatoptions<
             \|delfunction! FindStanzaEntity
             \|nunmap <Plug>(stanza-up-indent)
             \|nunmap <Plug>(stanza-down-indent)"
