@@ -64,8 +64,10 @@ syn match stanzaProductionName display contained "\K\k*" nextgroup=stanzaProduct
 syn match stanzaProductionColon ":" contained contains=stanzaColon skipwhite skipnl nextgroup=stanzaQualifiedType,stanzaCompositeType
 
 " Package definition (e.g. `defpackage Foo:\n import Bar`)
-syn region stanzaPackageDefinition matchgroup=stanzaKeyword start="^\z(\s*\)\zs\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\|;\)" end="^" contains=TOP
-syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition
+syn region stanzaPackageDefinition start="^\z(\s*\)\ze\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\|;\)" end="^" contains=TOP
+syn keyword stanzaKeyword defpackage nextgroup=stanzaPackageIdentifier skipwhite contained containedin=stanzaPackageDefinition
+syn match stanzaPackageIdentifier "\%(\k\|/\)\+" contained display
+syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition nextgroup=stanzaPackageIdentifier skipwhite
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
 syn keyword stanzaExtern extern nextgroup=stanzaKeyword,stanzaExternFunctionName skipwhite
@@ -86,6 +88,9 @@ syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualif
 
 " use `\k\+` here because package names can start with a number
 syn match stanzaQualifiedType "\%(\k\|/\)\+/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType contains=stanzaPackageQualifier,stanzaPackageSlash
+
+syn match stanzaPackageQualifier "\K\k*\ze/" nextgroup=stanzaPackageQualifierSlash
+syn match stanzaPackageQualifierSlash "/" contained nextgroup=stanzaPackageQualifier
 
 syn match stanzaArrow "->" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
