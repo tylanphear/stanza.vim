@@ -108,11 +108,6 @@ syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
 " Type definition
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaStructName skipwhite
 
-" Struct definition
-syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn keyword stanzaKeyword defstruct contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
-syn match stanzaStructFieldName "\K\k*\ze\s*:" contained containedin=stanzaStructDefinition,stanzaLSTypeDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
-syn match stanzaStructFieldColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 syn match stanzaStructName "\K\k*" display contained nextgroup=stanzaOf
 
@@ -215,6 +210,12 @@ syn keyword stanzaKeyword fn fn* nextgroup=stanzaFunctionParams skipwhite
 " Has to come after `stanzaFunctionCall`, since it otherwise would be
 " highlighted as a function call.
 syn match stanzaConditionalAccess "\<\%(public-when\|protected-when\|private-when\)\>"
+
+" Struct definition
+syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\%(-when(\K\k*)\)\?\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+syn keyword stanzaKeyword defstruct contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
+syn match stanzaStructFieldName "\K\k*\ze\s*:" contained containedin=stanzaStructDefinition,stanzaLSTypeDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
+syn match stanzaStructFieldColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
 
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
