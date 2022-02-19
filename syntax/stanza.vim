@@ -267,7 +267,8 @@ syn sync match stanzaSync grouphere stanzaLSFunctionDefinition "^\s*\%(\%(public
 syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
 syn sync match stanzaSync grouphere stanzaPackageDefinition "^\s*defpackage\>"
 
-syn sync match stanzaSync grouphere stanzaFunctionParams "^\s*\%(\%(public\|protected\|private\)\s\+\)\%(defn\|defmethod\)\s*\%(\K\k\)*\%(<.*>\)\?\s*"
+syn sync match stanzaSync grouphere stanzaFunctionParams "^\s*\%(\%(public\|protected\|private\)\s\+\)\?\%(defn\|defn\*\|defmethod\|defmethod\*\)\s\+\%(\K\k*\)\%(<.*>\)\?\s\+"
+syn sync match stanzaSync grouphere NONE ")\s*->\s*.*:"
 
 hi def link stanzaAccess StorageClass
 hi def link stanzaConditionalAccess stanzaAccess
