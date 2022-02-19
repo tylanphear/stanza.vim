@@ -52,9 +52,9 @@ syn match stanzaTabError "\t\+" display
 syn match stanzaColon ":"
 
 " Operators that can appear in Stanza identifiers
-syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\)\k\@!"
+syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\|<\)\k\@!"
 " Operators that *can't* appear in Stanza identifiers
-syn match stanzaOperator "\%(|\|&\|<\|<=\|>\|>=\|=>\)"
+syn match stanzaOperator "\%(|\|&\|<=\|>\|>=\|=>\)"
 
 syn keyword stanzaKeyword defsyntax defrule fail-if nextgroup=stanzaMacroName skipwhite
 syn match stanzaMacroName display contained "\K\k*"
@@ -79,19 +79,20 @@ syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" 
 syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaArrow skipwhite skipnl
 syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
-syn match stanzaCompositeType "\K\k*\%(<.\{-}\)\?" contained contains=stanzaType,stanzaOf,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow skipwhite
+syn match stanzaCompositeType "\K\k*" contained contains=stanzaType,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow skipwhite
+syn match stanzaCompositeType "\K\k*\ze<" contained contains=stanzaType nextgroup=stanzaOf
 syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
 syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
 
 " use `\k\+` here because package names can start with a number
-syn match stanzaQualifiedType "\%(\k\+\)\?/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType
+syn match stanzaQualifiedType "\%(\k\|/\)\+/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType contains=stanzaPackageQualifier,stanzaPackageSlash
 
 syn match stanzaArrow "->" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
 
 syn match stanzaType "\K\k*" contained
 
 " A pair of angle brackets referring to some inner type
-syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">\|$" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType,stanzaArrow contained
+syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType,stanzaArrow,stanzaAndOr contained
 
 " Type constructors (union or sum types)
 syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
