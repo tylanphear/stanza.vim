@@ -14,7 +14,7 @@ syn keyword stanzaRepeat for while in
 syn keyword stanzaBoolean true false
 syn keyword stanzaThis this
 syn keyword stanzaQuestionType ?
-syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn keyword stanzaTypeOperator upcast-as as as? is-not is new nextgroup=@stanzaTypes skipwhite
 syn keyword stanzaNull null
 syn keyword stanzaFatal fatal fatal!
 
@@ -30,24 +30,24 @@ syn keyword stanzaKeyword generate nextgroup=stanzaOf
 
 " label<...> where ... is some arbitrary type
 syn keyword stanzaKeyword label nextgroup=stanzaLabelType
-syn region stanzaLabelType matchgroup=stanzaAngleBrackets start="<" end=">" contains=stanzaQualifiedType,stanzaCompositeType,stanzaArrow contained nextgroup=stanzaLabelBinding skipwhite oneline
-syn match stanzaLabelBinding "\K\k*" contained display
+syn region stanzaLabelType matchgroup=stanzaAngleBrackets start="<" end=">" contains=@stanzaTypes,stanzaArrow contained nextgroup=stanzaLabelBinding skipwhite oneline
+syn match stanzaLabelBinding "\K\k*" contained
 
 syn keyword stanzaException try finally throw
 syn keyword stanzaException catch nextgroup=stanzaCatchClause skipwhite
 syn region stanzaCatchClause start="(" end=")" contained contains=TOP
 syn match stanzaCatchBinding "\K\k*\ze:" contained containedin=stanzaCatchClause contains=TOP nextgroup=stanzaCatchColon skipwhite
-syn match stanzaCatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaCatchColon ":" contains=stanzaColon contained nextgroup=@stanzaTypes skipwhite
 
 syn keyword stanzaKeyword val var nextgroup=stanzaBindingName skipwhite
 syn match stanzaBindingName "\K\k*" contained nextgroup=stanzaVariableColon skipwhite
-syn match stanzaVariableColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaVariableColon ":" contained contains=stanzaColon nextgroup=@stanzaTypes skipwhite
 
 syn match stanzaAccess "\<\%(public\|protected\|private\)\>"
 
 " Any kind of tabs outside of strings and comments are an error in Stanza
 " (Stanza doesn't allow tabs!)
-syn match stanzaTabError "\t\+" display
+syn match stanzaTabError "\t\+"
 
 syn match stanzaColon ":"
 
@@ -57,16 +57,16 @@ syn match stanzaOperator "\k\@<!\%(\~\|\~@\|\^\|\$\|-\|+\|\*\|/\|%\|!=\|==\|=\|<
 syn match stanzaOperator "\%(|\|&\|<=\|>\|>=\|=>\)"
 
 syn keyword stanzaKeyword defsyntax defrule fail-if nextgroup=stanzaMacroName skipwhite
-syn match stanzaMacroName display contained "\K\k*"
+syn match stanzaMacroName contained "\K\k*"
 
 syn keyword stanzaKeyword defproduction nextgroup=stanzaProductionName skipwhite
-syn match stanzaProductionName display contained "\K\k*" nextgroup=stanzaProductionColon skipwhite
-syn match stanzaProductionColon ":" contained contains=stanzaColon skipwhite skipnl nextgroup=stanzaQualifiedType,stanzaCompositeType
+syn match stanzaProductionName contained "\K\k*" nextgroup=stanzaProductionColon skipwhite
+syn match stanzaProductionColon ":" contained contains=stanzaColon skipwhite skipnl nextgroup=@stanzaTypes
 
 " Package definition (e.g. `defpackage Foo:\n import Bar`)
 syn region stanzaPackageDefinition start="^\z(\s*\)\ze\<defpackage\>" matchgroup=NONE skip="^\(\z1\s\|$\|;\)" end="^" contains=TOP
 syn keyword stanzaKeyword defpackage nextgroup=stanzaPackageIdentifier skipwhite contained containedin=stanzaPackageDefinition
-syn match stanzaPackageIdentifier "\%(\k\|/\)\+" contained display
+syn match stanzaPackageIdentifier "\%(\k\|/\)\+" contained
 syn keyword stanzaInclude contained from import with containedin=stanzaPackageDefinition nextgroup=stanzaPackageIdentifier skipwhite
 
 " Extern definition (e.g. `extern malloc: (long) -> ptr<byte>`)
@@ -76,31 +76,31 @@ syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup
 
 " Function definition (e.g. `defn to-int (s: String) -> Int`)
 syn keyword stanzaKeyword defn defn* defmulti defmethod defmethod* nextgroup=stanzaFunctionName skipwhite
-syn match stanzaFunctionName "\K\k*" display contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
+syn match stanzaFunctionName "\K\k*" contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite oneline
 syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaArrow skipwhite skipnl
-syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
+syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=@stanzaTypes skipwhite skipnl
 
-syn match stanzaCompositeType "\K\k*" contained contains=stanzaType,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow skipwhite
-syn match stanzaCompositeType "\K\k*\ze<" contained contains=stanzaType nextgroup=stanzaOf
-syn region stanzaCompositeType start="\[" end="\]" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
-syn region stanzaCompositeType start="(" end=")" contained contains=stanzaQualifiedType,stanzaCompositeType nextgroup=stanzaAndOr,stanzaArrow skipwhite
+syn match stanzaCompositeType "\K\k*" contained contains=stanzaType,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow,stanzaOf skipwhite
+syn region stanzaCompositeType start="\[" end="\]" contained contains=@stanzaTypes nextgroup=stanzaAndOr,stanzaArrow skipwhite
+syn region stanzaCompositeType start="(" end=")" contained contains=@stanzaTypes nextgroup=stanzaAndOr,stanzaArrow skipwhite
 
 " use `\k\+` here because package names can start with a number
-syn match stanzaQualifiedType "\%(\k\|/\)\+/"he=e-1 contained nextgroup=stanzaQualifiedType,stanzaCompositeType contains=stanzaPackageQualifier,stanzaPackageSlash
+syn match stanzaQualifiedType "\%(\k\|/\)\+/"he=e-1 contained nextgroup=@stanzaTypes contains=stanzaPackageQualifier,stanzaPackageSlash
+syn cluster stanzaTypes contains=stanzaQualifiedType,stanzaCompositeType
 
 syn match stanzaPackageQualifier "\K\k*\ze/" nextgroup=stanzaPackageQualifierSlash
 syn match stanzaPackageQualifierSlash "/" contained nextgroup=stanzaPackageQualifier
 
-syn match stanzaArrow "->" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
+syn match stanzaArrow "->" contained nextgroup=@stanzaTypes skipwhite skipnl
 
 syn match stanzaType "\K\k*" contained
 
 " A pair of angle brackets referring to some inner type
-syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">" contains=stanzaOf,stanzaQualifiedType,stanzaCompositeType,stanzaArrow,stanzaAndOr contained
+syn region stanzaOf matchgroup=stanzaAngleBrackets start="<" end=">" contains=stanzaOf,@stanzaTypes,stanzaArrow,stanzaAndOr contained skipwhite nextgroup=stanzaAndOr,stanzaArrow
 
 " Type constructors (union or sum types)
-syn match stanzaAndOr "|\|&" contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite skipnl
+syn match stanzaAndOr "|\|&" contained nextgroup=@stanzaTypes skipwhite skipnl
 
 " Enum definition (e.g. `defenum Foo`)
 syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
@@ -108,11 +108,10 @@ syn keyword stanzaKeyword defenum nextgroup=stanzaStructName skipwhite
 " Type definition
 syn match stanzaKeyword "\<deftype\>" nextgroup=stanzaStructName skipwhite
 
-
-syn match stanzaStructName "\K\k*" display contained nextgroup=stanzaOf
+syn match stanzaStructName "\K\k*" contained nextgroup=stanzaOf
 
 " This has to come *after* the matches for `<` and `:` so it takes priority
-syn match stanzaTypeAnnotation "<:" nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaTypeAnnotation "<:" nextgroup=@stanzaTypes skipwhite
 
 " TODOs and such
 syn keyword stanzaTodo TODO FIXME NOTE
@@ -127,10 +126,10 @@ syn cluster stanzaComments contains=stanzaComment,stanzaBlockComment
 
 " Captured type arguments (e.g. `defn foo<?T>`) or captured syntax match
 " groups (e.g. `?tag:id`)
-syn match stanzaCapture "?\K\k*" display
+syn match stanzaCapture "?\K\k*"
 
 " Stanza symbols can contain anything but whitespace or parentheses (of any kind)
-syn match stanzaSymbol "`[^][{}() ]\+" display
+syn match stanzaSymbol "`[^][{}() ]\+"
 
 " All kinds of Stanza numbers with their associated prefixes and suffixes
 
@@ -187,8 +186,8 @@ syn match stanzaEscapeError "\\[^bnrt'"\\]" contained
 " Anonymous functions
 syn region stanzaAnonymousFn matchgroup=stanzaCurlyBracket start="{" end="}" contains=TOP
 
-syn match stanzaAnonymousParameter "_\d*" display contained containedin=stanzaAnonymousFn nextgroup=stanzaAnonymousParameterColon skipwhite
-syn match stanzaAnonymousParameterColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaAnonymousParameter "_\d*" contained containedin=stanzaAnonymousFn nextgroup=stanzaAnonymousParameterColon skipwhite
+syn match stanzaAnonymousParameterColon ":" contained contains=stanzaColon nextgroup=@stanzaTypes skipwhite
 
 " Function calls (e.g. `foo(...)`)
 syn match stanzaFunctionCall "\K\k*\ze("
@@ -211,11 +210,13 @@ syn keyword stanzaKeyword fn fn* nextgroup=stanzaFunctionParams skipwhite
 " highlighted as a function call.
 syn match stanzaConditionalAccess "\<\%(public-when\|protected-when\|private-when\)\>"
 
-" Struct definition
-syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\%(-when(\K\k*)\)\?\s\+\)\?\zedefstruct\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
+" Struct definition (e.g. `defstruct`).
+" Has to come after `stanzaFunctionCall` otherwise a struct with a conditional
+" access specifier (e.g. `public-when(...)`) will match as a function call instead.
+syn region stanzaStructDefinition start="^\z(\s*\)\%(\%(public\|protected\|private\)\%(-when(\K\k*)\)\?\s\+\)\?\zedefstruct\>" skip="^\%(\z1\s\|$\)" end="^" contains=TOP
 syn keyword stanzaKeyword defstruct contained containedin=stanzaStructDefinition nextgroup=stanzaStructName skipwhite
 syn match stanzaStructFieldName "\K\k*\ze\s*:" contained containedin=stanzaStructDefinition,stanzaLSTypeDefinition contains=@stanzaComments nextgroup=stanzaStructFieldColon skipwhite
-syn match stanzaStructFieldColon ":" contained contains=stanzaColon nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaStructFieldColon ":" contained contains=stanzaColon nextgroup=@stanzaTypes skipwhite
 
 " Has to come after `stanzaFunctionCall`, since there are some directives
 " (e.g. `#if-defined(`) that could also be highlighted as a function call.
@@ -227,7 +228,7 @@ syn region stanzaMatchClause start="(" end=")\s*:\|$" contained contains=TOP one
 
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
-syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=stanzaQualifiedType,stanzaCompositeType skipwhite
+syn match stanzaMatchColon ":" contains=stanzaColon contained nextgroup=@stanzaTypes skipwhite
 
 " LoStanza stuff
 syn match stanzaAccess "\<lostanza\>"
