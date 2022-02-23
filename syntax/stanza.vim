@@ -78,12 +78,13 @@ syn match stanzaExternFunctionColon ":" contained contains=stanzaColon nextgroup
 syn keyword stanzaKeyword defn defn* defmulti defmethod defmethod* nextgroup=stanzaFunctionName skipwhite
 syn match stanzaFunctionName "\K\k*" contained nextgroup=stanzaFunctionParams,stanzaFunctionGenericParams skipwhite
 syn region stanzaFunctionGenericParams matchgroup=stanzaAngleBrackets start="<" end=">" contained contains=stanzaType,stanzaCapture nextgroup=stanzaFunctionParams skipwhite oneline
-syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaArrow skipwhite skipnl
+syn region stanzaFunctionParams start="(" end=")" contained contains=TOP nextgroup=stanzaArrow skipwhite skipnl keepend
 syn match stanzaFunctionParamColon ":" contains=stanzaColon contained containedin=stanzaFunctionParams nextgroup=@stanzaTypes skipwhite skipnl
 
 syn match stanzaCompositeType "\K\k*" contained contains=stanzaType,stanzaCapture,stanzaQuestionType nextgroup=stanzaAndOr,stanzaArrow,stanzaOf skipwhite
 syn region stanzaCompositeType start="\[" end="\]" contained contains=@stanzaTypes nextgroup=stanzaAndOr,stanzaArrow skipwhite
-syn region stanzaCompositeType start="(" end=")" contained contains=@stanzaTypes nextgroup=stanzaAndOr,stanzaArrow skipwhite
+
+syn region stanzaCompositeType start="(" end=")" contained contains=@stanzaTypes nextgroup=stanzaAndOr,stanzaArrow skipwhite extend
 
 " use `\k\+` here because package names can start with a number
 syn match stanzaQualifiedType "\%(\k\|/\)\+/"he=e-1 contained nextgroup=@stanzaTypes contains=stanzaPackageQualifier,stanzaPackageSlash
@@ -269,7 +270,6 @@ syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|pr
 syn sync match stanzaSync grouphere stanzaPackageDefinition "^\s*defpackage\>"
 
 syn sync match stanzaSync grouphere stanzaFunctionParams "^\s*\%(\%(public\|protected\|private\)\s\+\)\?\%(defn\|defn\*\|defmethod\|defmethod\*\)\s\+\%(\K\k*\)\%(<.*>\)\?\s\+"
-syn sync match stanzaSync grouphere NONE ")\s*->\s*.*:"
 
 hi def link stanzaAccess StorageClass
 hi def link stanzaConditionalAccess stanzaAccess
