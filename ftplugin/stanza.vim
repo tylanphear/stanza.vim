@@ -23,6 +23,10 @@ setlocal matchpairs+=<:>
 
 setlocal formatoptions-=t formatoptions+=croqnl
 
+if get(b:, 'current_compiler', '') ==# ''
+    compiler stanza
+endif
+
 function! FindStanzaEntity()
     let l:word = expand('<cword>')
     let l:pattern = '(defn|defmethod|defstruct|deftype|defenum)'
