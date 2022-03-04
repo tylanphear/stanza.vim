@@ -108,12 +108,18 @@ function! s:OpenReplInCurrentPackage()
         return
     endif
     execute l:stanza_cmd.' repl '.l:package
+
+function s:CheckPackage()
+    let l:package = expand('%:S')
+    let l:null_file = has('win32') ? 'NULL' : '/dev/null'
+    exec 'make '.l:package.' -o '.l:null_file
 endfunction
 
 nnoremap <Plug>(stanza-up-indent)   <Cmd>call <SID>UpIndent()<CR>
 nnoremap <Plug>(stanza-down-indent) <Cmd>call <SID>DownIndent()<CR>
 nnoremap <Plug>(stanza-open-repl-in-current-package) <Cmd>call <SID>OpenReplInCurrentPackage()<CR>
 nnoremap <Plug>(stanza-run-current-test-package) <Cmd>call <SID>RunCurrentTestPackage()<CR>
+nnoremap <Plug>(stanza-check-package) <Cmd>call <SID>CheckPackage()<CR>
 
 let b:undo_ftplugin = "
             \setlocal iskeyword< cinkeys< indentkeys< include< define< suffixesadd< comments< commentstring< matchpairs< formatoptions<
@@ -121,7 +127,8 @@ let b:undo_ftplugin = "
             \|nunmap <Plug>(stanza-up-indent)
             \|nunmap <Plug>(stanza-down-indent)
             \|nunmap <Plug>(stanza-open-repl-in-current-package)
-            \|nunmap <Plug>(stanza-run-current-test-package)"
+            \|nunmap <Plug>(stanza-run-current-test-package)
+            \|nunmap <Plug>(stanza-check-package)"
 
 let &cpo = s:saved_cpo
 unlet s:saved_cpo
