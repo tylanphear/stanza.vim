@@ -225,7 +225,7 @@ syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-synta
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
 syn region stanzaMatch matchgroup=stanzaKeyword start="\z(\s*\)\%(.*\)\zs\<match\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn region stanzaMatchClause start="(" end=")\s*:\|$" contained contains=TOP oneline keepend containedin=stanzaMatch
+syn region stanzaMatchClause start="^\s*(" end=")\s*:\|$" contained contains=TOP oneline keepend containedin=stanzaMatch
 
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
@@ -268,8 +268,6 @@ syn region stanzaLSTypeDefinition matchgroup=stanzaAccess start="^\z(\s*\)\%(\%(
 syn sync match stanzaSync grouphere stanzaLSFunctionDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*\%(defn\|defn\*\|defmethod\|defmethod\*\)\>"
 syn sync match stanzaSync grouphere stanzaLSTypeDefinition "^\s*\%(\%(public\|private\|protected\)\s\+\)\?lostanza\s*deftype\>"
 syn sync match stanzaSync grouphere stanzaPackageDefinition "^\s*defpackage\>"
-
-syn sync match stanzaSync grouphere stanzaFunctionParams "^\s*\%(\%(public\|protected\|private\)\s\+\)\?\%(defn\|defn\*\|defmethod\|defmethod\*\)\s\+\%(\K\k*\)\%(<.*>\)\?\s\+"
 
 hi def link stanzaAccess StorageClass
 hi def link stanzaConditionalAccess stanzaAccess
