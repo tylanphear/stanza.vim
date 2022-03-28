@@ -225,7 +225,7 @@ syn match stanzaDirective "#\%(if-defined\|if-not-defined\|else\|use-added-synta
 
 " Also has to come after `stanzaFunctionCall` so that `match(...)` works
 syn region stanzaMatch matchgroup=stanzaKeyword start="\z(\s*\)\%(.*\)\zs\<match\>" skip="^\(\z1\s\|$\)" end="^" contains=TOP
-syn region stanzaMatchClause start="^\s*(" end=")\s*:\|$" contained contains=TOP oneline keepend containedin=stanzaMatch
+syn region stanzaMatchClause start="(\ze[^)]\+:" end=")\s*:\|$" contained contains=TOP oneline keepend containedin=stanzaMatch
 
 syn match stanzaMatchBinding "\K\k*\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
 syn match stanzaMatchBinding "[^:]\{-1,}\ze:" contained containedin=stanzaMatchClause contains=TOP nextgroup=stanzaMatchColon skipwhite
